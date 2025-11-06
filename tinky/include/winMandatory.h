@@ -1,0 +1,24 @@
+#pragma once
+
+#include <sdkddkver.h>
+
+#ifdef _WIN32_WINNT_WIN10
+# ifndef _WIN32_WINNT_WIN10_TH2
+#  define _WIN32_WINNT_WIN10_TH2 _WIN32_WINNT_WIN10
+# endif
+# ifndef _WIN32_WINNT_WIN10_RS1
+#  define _WIN32_WINNT_WIN10_RS1 _WIN32_WINNT_WIN10
+# endif
+# ifndef _WIN32_WINNT_WIN10_RS2
+#  define _WIN32_WINNT_WIN10_RS2 _WIN32_WINNT_WIN10
+# endif
+# ifndef _WIN32_WINNT_WIN10_RS3
+#  define _WIN32_WINNT_WIN10_RS3 _WIN32_WINNT_WIN10
+# endif
+# ifndef _WIN32_WINNT_WIN10_RS4
+#  define _WIN32_WINNT_WIN10_RS4 _WIN32_WINNT_WIN10
+# endif
+# ifndef _WIN32_WINNT_WIN10_RS5
+#  define _WIN32_WINNT_WIN10_RS5 _WIN32_WINNT_WIN10
+# endif
+#endif
