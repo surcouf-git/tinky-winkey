@@ -16,6 +16,7 @@ int printErr(int wich, char *what) {
 	if (wich == EINARG) {
 		wcerr	<< "\"" << what << "\""
 				<< L" -> invalid argument\n";
+		printUsage();
 	}
 	return (EXIT_FAILURE);
 }
