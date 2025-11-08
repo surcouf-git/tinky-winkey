@@ -1,7 +1,16 @@
 #include <iostream>
+#include "winMandatory.h"
+#include <windows.h>
 #include "utils.hpp"
 
 using namespace std;
+
+void trackMemoryLeaks(void) {
+#define _CRTDBG_MAP_ALLOC
+#include <cstdlib>
+#include <crtdbg.h>
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+}
 
 int printUsage(void) {
 	wcerr	<< L"-> sc.exe [arg]\nList of args:\n\n"

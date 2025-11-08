@@ -1,15 +1,10 @@
-#include "winMandatory.h"
-#include <windows.h>
-#include <iostream>
 #include "tinky.hpp"
+#include <iostream>
+#include "utils.hpp"
 
 using namespace std;
 
 // TODO dont forget to CloseServiceHandle()
-
-static int isServiceAlreadyExist(void) {
-	return (0x01);
-}
 
 static int openSCM(tinky_t *tinky) {
 	tinky->HServiceControlManager = OpenSCManager(NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE); // SC_MANAGER_ALL_ACCESS
@@ -24,7 +19,7 @@ static int createService(tinky_t *tinky) {
 	if (!openSCM(tinky))
 		return (FAILURE);
 	
-	tinky->HService = CreateServiceA(
+	tinky->HService = CreateService(
 		tinky->HServiceControlManager,
 		SVC_NAME,
 		SVC_NAME,
@@ -37,19 +32,20 @@ static int createService(tinky_t *tinky) {
 		NULL, // lpLoadOrderGroup
 		NULL, // dependencies
 		USER_NAME, //
-		USER_PASS // need to see what is LocalSystem etc..
+		USER_PASS // TODO need to see what is LocalSystem etc..
 	);
-	wcerr << L"Returned: " << tinky->HService << '\n';
+
 	if (!tinky->HService) {
-		wcerr << L" error code: " << GetLastError() << '\n';
+		wcerr << L"CreateServiceA returned: " << tinky->HService << " (failure)" << '\n'; // Remove
+		DWORD code = GetLastError();
+		if (code == ERROR_SERVICE_EXISTS)
+			wcerr << L"Service tinky already exist\n";
+		return (FAILURE);
 	}
 	return (SUCCESS);
 }
 
 int install(tinky_t *tinky) {
-	if (!isServiceAlreadyExist())
-		return (FAILURE);
-	
 	if (!createService(tinky))
 		return (FAILURE);
 

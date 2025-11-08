@@ -2,6 +2,9 @@
 
 #include "winMandatory.h"
 #include <windows.h>
+#include <iostream>
+
+#include "unicode.h"
 
 // =============== Magic variables ========== //
 #define USER_NAME ".\\keylogger"
@@ -26,4 +29,6 @@ typedef struct tinky {
 
 // =============== createService.cpp ===============//
 int install(tinky_t *tinky);
-// ============================================= //
+// =============== start.cpp =============== //
+#define BIN_NAME "winkey"
+int start(tinky_t *tinky);
