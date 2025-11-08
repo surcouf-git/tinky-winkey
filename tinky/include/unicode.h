@@ -28,3 +28,9 @@ typedef LPSERVICE_TABLE_ENTRYA LPSERVICE_TABLE_ENTRY;
 #else
 #define StartServiceCtrlDispatcher  StartServiceCtrlDispatcherA
 #endif // !UNICODE
+
+#ifdef UNICODE
+#define RegisterServiceCtrlHandlerEx  RegisterServiceCtrlHandlerExW
+#else
+#define RegisterServiceCtrlHandlerEx  RegisterServiceCtrlHandlerExA
+#endif // !UNICODE

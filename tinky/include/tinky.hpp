@@ -10,7 +10,8 @@
 #define USER_NAME ".\\keylogger"
 #define USER_PASS "docker"
 #define SVC_NAME "tinky"
-#define BINARY_PATH "C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\install.exe"
+#define DEF_NAME ""
+#define BINARY_PATH "C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\prog.exe"
 // global {
 #define FAILURE 0
 #define SUCCESS 1

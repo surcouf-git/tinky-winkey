@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
 	tinky_t tinky = {};
 	bool isJobDone = false;
 
-	memset(&tinky, 0, sizeof(tinky));
 	for (int i = 0; i < NFUNC; i++) {
 		if (!strcmp(argv[1], args[i])) {
 			cout << "Doing job (" << args[i] << ")\n";

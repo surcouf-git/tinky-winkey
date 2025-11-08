@@ -19,7 +19,7 @@ static int createService(tinky_t *tinky) {
 	if (!openSCM(tinky))
 		return (FAILURE);
 	
-	tinky->HService = CreateService(
+	tinky->HService = CreateServiceA(
 		tinky->HServiceControlManager,
 		SVC_NAME,
 		SVC_NAME,
