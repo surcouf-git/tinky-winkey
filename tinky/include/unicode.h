@@ -22,3 +22,9 @@ typedef LPSERVICE_TABLE_ENTRYA LPSERVICE_TABLE_ENTRY;
 #else
 #define LPSERVICE_MAIN_FUNCTION LPSERVICE_MAIN_FUNCTIONA
 #endif // !UNICODE
+
+#ifdef UNICODE
+#define StartServiceCtrlDispatcher  StartServiceCtrlDispatcherW
+#else
+#define StartServiceCtrlDispatcher  StartServiceCtrlDispatcherA
+#endif // !UNICODE

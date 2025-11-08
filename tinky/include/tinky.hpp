@@ -30,5 +30,5 @@ typedef struct tinky {
 // =============== createService.cpp ===============//
 int install(tinky_t *tinky);
 // =============== start.cpp =============== //
-#define BIN_NAME "winkey"
+#define BIN_NAME ".\\winkey"
 int start(tinky_t *tinky);
