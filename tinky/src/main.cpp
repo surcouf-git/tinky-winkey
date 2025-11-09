@@ -17,28 +17,35 @@ void cleanExit(tinky_t *tinky) {
 	}
 }
 
-int main(int argc, char **argv) {
-	if (argc != 2)
-		return (printUsage());
-
-	char *args[] = { "install", "start", "stop", "delete" };
-	int (*funcPtr[NFUNC]) (tinky_t *) = { &install, &start, NULL, NULL };
-
+int __cdecl main(int argc, char **argv) {
 	tinky_t tinky = {};
-	bool isJobDone = false;
 
-	for (int i = 0; i < NFUNC; i++) {
-		if (!strcmp(argv[1], args[i])) {
-			cout << "Doing job (" << args[i] << ")\n";
-			funcPtr[i](&tinky);
-			isJobDone = true;
-			cout << "Job done (" << args[i] << ")\n";
+
+	if (argc == 1) { /* Service Console Manager Call */
+
+		startedBySCM(&tinky);
+		return (0);
+
+	} else if (argc == 2) { /* Console Call */
+
+		char *args[] = { "install", "start", "stop", "delete" };
+		int (*funcPtr[NFUNC]) (tinky_t *) = { &install, &start, NULL, NULL };
+		
+		bool isJobDone = false;
+
+		for (int i = 0; i < NFUNC; i++) {
+			if (!strcmp(argv[1], args[i])) {
+				cout << "Doing job (" << args[i] << ")\n";
+				funcPtr[i](&tinky);
+				isJobDone = true;
+				cout << "Job done (" << args[i] << ")\n";
+			}
 		}
+		if (isJobDone == false) return (printErr(EINARG, argv[1]));
+		cleanExit(&tinky);
+
+	} else {
+		return (printUsage());
 	}
-
-	if (isJobDone == false)
-		return (printErr(EINARG, argv[1]));
-
-	cleanExit(&tinky);
 	return (0);
 }

