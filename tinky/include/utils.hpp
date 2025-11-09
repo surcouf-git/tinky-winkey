@@ -10,3 +10,5 @@ int printUsage(void);
 int printErr(int wich, char *what);
 
 void trackMemoryLeaks(void);
+#define DEBUG_FILE "C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\svc_debug.log"
+void LogToFile(const char* message);

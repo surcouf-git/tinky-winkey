@@ -15,8 +15,13 @@ DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEven
 	// Handle SERVICE_CONTROL_SHUTDOWN !
 	// Handle SERVICE_CONTROL_STOP !
 	// Handle SERVICE_CONTROL_SESSIONCHANGE !
-	if (dwControl == SERVICE_CONTROL_INTERROGATE)
-		return (NO_ERROR);
+	switch(dwControl) {
+		case (SERVICE_CONTROL_INTERROGATE):
+			return (NO_ERROR);
+		case (SERVICE_CONTROL_STOP):
+			
+			return (NO_ERROR);
+	}
 	(void)dwEventType; // Event type, handle only if dwControl == SERVICE_CONTROL_SESSIONCHANGE
 	(void)lpEventData; // Same as above
 	(void)lpContext; // Same as RegisterServiceCtrlHandlerEx lpContext (void* user data)
@@ -25,14 +30,14 @@ DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEven
 
 /* WINAPI ServiceMain() */
 VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
-	wcout << L"Demarrage du service\n";
-	
+	LogToFile("In ServiceMain\n");
+
 	gSvcStatusHandle = RegisterServiceCtrlHandlerEx(
 		SVC_NAME,
 		&handlerFunctionEx,
 		NULL
 	);
-	cout << "Status handle returned: " << gSvcStatusHandle << '\n';
+	LogToFile("Status handle returned: \n");
 	//if (!gSvcStatusHandle) {
 		//report event
 		//return 
@@ -43,9 +48,11 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 	gSvcStatus.dwServiceSpecificExitCode = 0;
 
 	if (!SetServiceStatus(gSvcStatusHandle, &gSvcStatus)) {
-		cerr << "SetServiceStatus failed with code : " << GetLastError() << "\n";
+		string str("SetServiceStatus failed with code : " + GetLastError() + '\n');
+		LogToFile(str.c_str());
 	} else {
-		cout << "SetServiceStatus success\n";
+		string str("SetServiceStatus success\n" + '\n');
+		LogToFile(str.c_str());
 	}
 	(void)dwNumServicesArgs, (void)lpServiceArgVectors;
 }
@@ -61,11 +68,15 @@ static void initTableEntry(SERVICE_TABLE_ENTRYA svcTableEntry[]) {
 
 /* https://learn.microsoft.com/fr-fr/windows/win32/services/service-entry-point */
 int startedBySCM(tinky_t *tinky) {
-	wcout << L"Entering start\n"; // TODO delete
+	LogToFile("Entering start\n");
 	SERVICE_TABLE_ENTRYA svcTableEntry[2] = {};
 
 	initTableEntry(svcTableEntry);
 	if (!StartServiceCtrlDispatcherA(svcTableEntry)) {
+
+		string str("Error while StartServiceCtrl" + GetLastError() + '\n');
+		LogToFile(str.c_str());
+
 		DWORD lastErr = GetLastError();
 		switch (lastErr) {
 			case (ERROR_FAILED_SERVICE_CONTROLLER_CONNECT):

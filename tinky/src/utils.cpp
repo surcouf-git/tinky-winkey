@@ -29,3 +29,14 @@ int printErr(int wich, char *what) {
 	}
 	return (EXIT_FAILURE);
 }
+
+void LogToFile(const char* message) {
+	FILE* f = fopen(DEBUG_FILE, "a");
+	if (f) {
+		SYSTEMTIME st;
+		GetLocalTime(&st);
+		fprintf(f, "[%02d:%02d:%02d] %s\n", 
+				st.wHour, st.wMinute, st.wSecond, message);
+		fclose(f);
+	}
+}
