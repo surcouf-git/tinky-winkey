@@ -58,10 +58,10 @@ static void launchProcess(LPCWSTR processPath) {
 		&si,
 		&pi
 	)) {
-		WaitForSingleObject(pi.hProcess, INFINITE);
+		//WaitForSingleObject(pi.hProcess, INFINITE);
 
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
+		//CloseHandle(pi.hProcess);
+		//CloseHandle(pi.hThread);
 	}
 }
 

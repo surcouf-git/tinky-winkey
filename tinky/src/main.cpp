@@ -24,7 +24,6 @@ int __cdecl main(int argc, char **argv) {
 	if (argc == 1) { /* Service Console Manager Call */
 
 		startedBySCM(&tinky);
-		return (0);
 
 	} else if (argc == 2) { /* Console Call */
 
@@ -44,8 +43,6 @@ int __cdecl main(int argc, char **argv) {
 		if (isJobDone == false) return (printErr(EINARG, argv[1]));
 		cleanExit(&tinky);
 
-	} else {
-		return (printUsage());
 	}
-	return (0);
+	return (printUsage());
 }

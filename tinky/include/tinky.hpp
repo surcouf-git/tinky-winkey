@@ -1,18 +1,21 @@
 #pragma once
 
+#define UNICODE
+#define _UNICODE
+
 #include "winMandatory.h"
 #include <windows.h>
 #include <iostream>
 
-#include "unicode.h"
+//#include "unicode.h"
 
 // =============== Magic variables ========== //
-#define USER_NAME TEXT(".\\keylogger")
-#define LOCALSYS TEXT("keylogger\\LocalSystem")
+#define USER_NAME TEXT(".\\surcouf")
+#define LOCALSYS TEXT("surcouf\\LocalSystem")
 #define SVC_NAME TEXT("tinky")
 #define DEF_NAME ""
-#define WINKEY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\winkey.exe")
-#define BINARY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\prog.exe")
+#define WINKEY_PATH TEXT("C:\\Users\\surcouf\\Desktop\\trash\\tinky-winkey\\winkey.exe")
+#define BINARY_PATH TEXT("C:\\Users\\surcouf\\Desktop\\trash\\tinky-winkey\\prog.exe")
 // global {
 #define FAILURE 0
 #define SUCCESS 1

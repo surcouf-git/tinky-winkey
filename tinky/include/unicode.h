@@ -34,3 +34,9 @@ typedef LPSERVICE_TABLE_ENTRYA LPSERVICE_TABLE_ENTRY;
 #else
 #define RegisterServiceCtrlHandlerEx  RegisterServiceCtrlHandlerExA
 #endif // !UNICODE
+
+#ifdef UNICODE
+#define CreateProcess  CreateProcessW
+#else
+#define CreateProcess  CreateProcessA
+#endif // !UNICODE
