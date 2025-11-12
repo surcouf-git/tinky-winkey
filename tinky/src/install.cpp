@@ -17,7 +17,7 @@ static int createService(tinky_t *tinky) {
 	if (!openSCM(tinky))
 		return (FAILURE);
 	
-	tinky->HService = CreateService(
+	tinky->HService = CreateServiceA(
 		tinky->HServiceControlManager,
 		SVC_NAME,
 		SVC_NAME,
@@ -25,7 +25,7 @@ static int createService(tinky_t *tinky) {
 		SERVICE_WIN32_OWN_PROCESS,
 		SERVICE_DEMAND_START,
 		SERVICE_ERROR_NORMAL, // should log on error
-		BINARY_PATH, // TODO what is the final binary path ?
+		BINARY_PATH, // TODO what is the final binary path + GetCurrentDirectory() ?
 		NULL, // group order
 		NULL, // lpLoadOrderGroup
 		NULL, // dependencies

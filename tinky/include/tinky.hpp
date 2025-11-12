@@ -10,13 +10,11 @@
 //#include "unicode.h"
 
 // =============== Magic variables ========== //
-#define EVENTNAME TEXT("Global\\stop_winkey_process")
-#define USER_NAME TEXT(".\\keylogger")
-#define LOCALSYS TEXT("keylogger\\LocalSystem")
-#define SVC_NAME TEXT("tinky")
-#define DEF_NAME ""
-#define WINKEY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\winkey.exe")
-#define BINARY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\prog.exe")
+#define WINKEY_STOP "Global\\stop_winkey_process"
+#define LOCALSYS TEXT("surcouf\\LocalSystem")
+#define SVC_NAME "tinky"
+#define WINKEY_PATH "C:\\Users\\surcouf\\Desktop\\workspace-42\\tinky-winkey\\winkey.exe"
+#define BINARY_PATH "C:\\Users\\surcouf\\Desktop\\workspace-42\\tinky-winkey\\prog.exe"
 // global {
 #define NONE 0
 #define FAILURE 0
@@ -39,10 +37,10 @@ typedef struct tinky {
 	// start {
 	SERVICE_STATUS			svcStatus;
 	SERVICE_STATUS_HANDLE	svcStatusHandle;
-	HANDLE					svcStopEventHandle;
-	HANDLE					eventHandle;
-	STARTUPINFO 			startupInfo;
-	PROCESS_INFORMATION 	processInfo;
+	HANDLE					tinkyStopEventHandle;
+	HANDLE					winkeyStopEventHandle;
+	STARTUPINFOA			startupInfo;
+	PROCESS_INFORMATION		processInfo;
 	// }
 }	tinky_t;
 // ============================================= //

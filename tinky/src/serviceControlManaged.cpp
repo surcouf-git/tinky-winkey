@@ -26,7 +26,7 @@ DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEven
 }
 
 static void registerServiceHandler(void) {
-	tinky.svcStatusHandle = RegisterServiceCtrlHandlerEx(
+	tinky.svcStatusHandle = RegisterServiceCtrlHandlerExA(
 				SVC_NAME,
 				&handlerFunctionEx,
 				NULL
@@ -40,26 +40,28 @@ static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
 	SetServiceStatus(tinky.svcStatusHandle, &tinky.svcStatus);
 }
 
-static HANDLE createSignal(void) {
+static void createSignal(void) {
 	SECURITY_ATTRIBUTES secAttribute = {
 		sizeof(SECURITY_ATTRIBUTES),
 		NULL,
 		FALSE
 	};
 
-	tinky.eventHandle = CreateEvent(
+	tinky.winkeyStopEventHandle = CreateEventA(
 		&secAttribute,
 		FALSE,
 		FALSE,
-		EVENTNAME
+		WINKEY_STOP
 	);
 }
 
-static BYTE launchProcess(LPCWSTR processPath) {
+static BYTE launchProcess(const char *processPath) {
 	createSignal();
-	if (!CreateProcess(
-		processPath,
-		NULL, NULL, NULL,
+
+	if (!CreateProcessA(
+		processPath, // GetCurrentDirectory() ?
+		WINKEY_STOP, // NameSpace Global ?
+		NULL, NULL,
 		FALSE,
 		0, NULL, NULL,
 		&tinky.startupInfo,
@@ -85,14 +87,16 @@ void initSvc(void) {
 VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 	initSvc();
 
-	LPCWSTR noserv = L"noservice\n";
-	if (!launchProcess(noserv))
+	if (!launchProcess(WINKEY_PATH))
 		sendStatus(SERVICE_STOPPED, NONE);
 	else {
 		sendStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP);
 		while (true) {
-			WaitForSingleObject(tinky.processInfo.hProcess, INFINITE);
+			WaitForSingleObject(tinky.tinkyStopEventHandle, INFINITE);
+			if (!SetEvent(tinky.winkeyStopEventHandle))
+				LogToFile("Sending stop failed\n");
 			sendStatus(SERVICE_STOPPED, NONE);
+			break ; // Useless loop ?
 		}
 	}
 	(void)dwNumServicesArgs, (void)lpServiceArgVectors;
@@ -100,7 +104,7 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 
 /* SERVICE_TABLE_ENTRY = array of services (name + funcptr)*/
 static void initTableEntry(SERVICE_TABLE_ENTRYA svcTableEntry[]) {
-	svcTableEntry[0].lpServiceName = DEF_NAME;
+	svcTableEntry[0].lpServiceName = SVC_NAME;
 	svcTableEntry[0].lpServiceProc = &serviceMain;
 
 	svcTableEntry[1].lpServiceName = NULL;
