@@ -17,13 +17,13 @@ void cleanExit(tinky_t *tinky) {
 	}
 }
 
-int __cdecl main(int argc, char **argv) {
-	tinky_t tinky = {};
+tinky_t tinky = {};
 
+int __cdecl main(int argc, char **argv) {
 
 	if (argc == 1) { /* Service Console Manager Call */
 
-		startedBySCM(&tinky);
+		startedBySCM();
 
 	} else if (argc == 2) { /* Console Call */
 
@@ -42,7 +42,7 @@ int __cdecl main(int argc, char **argv) {
 		}
 		if (isJobDone == false) return (printErr(EINARG, argv[1]));
 		cleanExit(&tinky);
-
+		return (EXIT_SUCCESS);
 	}
-	return (printUsage());
+	return (EXIT_FAILURE);
 }

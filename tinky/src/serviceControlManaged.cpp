@@ -3,9 +3,7 @@
 
 using namespace std;
 
-SERVICE_STATUS			gSvcStatus = {};
-SERVICE_STATUS_HANDLE	gSvcStatusHandle = {};
-HANDLE					ghSvcStopEvent = NULL;
+extern tinky_t tinky;
 
 /* subject ControlService() ? */
 /* https://learn.microsoft.com/fr-fr/windows/win32/api/winsvc/nc-winsvc-lphandler_function_ex */
@@ -28,7 +26,7 @@ DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEven
 }
 
 static void registerServiceHandler(void) {
-	gSvcStatusHandle = RegisterServiceCtrlHandlerEx(
+	tinky.svcStatusHandle = RegisterServiceCtrlHandlerEx(
 				SVC_NAME,
 				&handlerFunctionEx,
 				NULL
@@ -36,53 +34,66 @@ static void registerServiceHandler(void) {
 }
 
 static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
-	gSvcStatus.dwCurrentState = currentState;
-	gSvcStatus.dwControlsAccepted = ctrlsAccepted;
+	tinky.svcStatus.dwCurrentState = currentState;
+	tinky.svcStatus.dwControlsAccepted = ctrlsAccepted;
 	
-	SetServiceStatus(gSvcStatusHandle, &gSvcStatus);
+	SetServiceStatus(tinky.svcStatusHandle, &tinky.svcStatus);
 }
 
-static void launchProcess(LPCWSTR processPath) {
-	STARTUPINFO si = {};
-	PROCESS_INFORMATION pi = {};
+static HANDLE createSignal(void) {
+	SECURITY_ATTRIBUTES secAttribute = {
+		sizeof(SECURITY_ATTRIBUTES),
+		NULL,
+		FALSE
+	};
 
-	if (CreateProcess(
-		processPath,
-		NULL,
-		NULL,
-		NULL,
+	tinky.eventHandle = CreateEvent(
+		&secAttribute,
 		FALSE,
-		0,
-		NULL,
-		NULL,
-		&si,
-		&pi
+		FALSE,
+		EVENTNAME
+	);
+}
+
+static BYTE launchProcess(LPCWSTR processPath) {
+	createSignal();
+	if (!CreateProcess(
+		processPath,
+		NULL, NULL, NULL,
+		FALSE,
+		0, NULL, NULL,
+		&tinky.startupInfo,
+		&tinky.processInfo
 	)) {
+		LogToFile("Service failed to launch\n");
+		return (FAILURE);
 		//WaitForSingleObject(pi.hProcess, INFINITE);
 
 		//CloseHandle(pi.hProcess);
 		//CloseHandle(pi.hThread);
 	}
+	return (SUCCESS);
 }
 
 void initSvc(void) {
-	gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-	sendStatus(SERVICE_START_PENDING, 0);
-
-	launchProcess(WINKEY_PATH);
+	registerServiceHandler();
+	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS; // Really useful ?
+	sendStatus(SERVICE_START_PENDING, NONE);
 }
 
 /* WINAPI ServiceMain() */
 VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
-	registerServiceHandler();
 	initSvc();
 
-	sendStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP);
-
-	if (!SetServiceStatus(gSvcStatusHandle, &gSvcStatus)) {
-		LogToFile("SetServiceStatus failed with code\n");
-	} else {
-		LogToFile("SetServiceStatus success\n");
+	LPCWSTR noserv = L"noservice\n";
+	if (!launchProcess(noserv))
+		sendStatus(SERVICE_STOPPED, NONE);
+	else {
+		sendStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP);
+		while (true) {
+			WaitForSingleObject(tinky.processInfo.hProcess, INFINITE);
+			sendStatus(SERVICE_STOPPED, NONE);
+		}
 	}
 	(void)dwNumServicesArgs, (void)lpServiceArgVectors;
 }
@@ -97,7 +108,7 @@ static void initTableEntry(SERVICE_TABLE_ENTRYA svcTableEntry[]) {
 }
 
 /* https://learn.microsoft.com/fr-fr/windows/win32/services/service-entry-point */
-int startedBySCM(tinky_t *tinky) {
+int startedBySCM(void) {
 	LogToFile("Entering start\n");
 	SERVICE_TABLE_ENTRYA svcTableEntry[2] = {};
 
@@ -121,6 +132,5 @@ int startedBySCM(tinky_t *tinky) {
 		}
 		return (FAILURE);
 	}
-	(void)tinky;
 	return (SUCCESS);
 }

