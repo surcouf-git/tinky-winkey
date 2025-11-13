@@ -78,30 +78,56 @@ static BYTE launchProcess(const char *processPath) {
 	return (SUCCESS);
 }
 
-void initSvc(void) {
+static BYTE createSvcStopEvent(void) {
+	tinky.tinkyStopEventHandle = CreateEvent(
+		NULL,
+		TRUE,
+		FALSE,
+		NULL
+	);
+	if (!tinky.tinkyStopEventHandle) {
+		journalReport("Failed to create stop event for tinky\n");
+		return (FAILURE);
+	}
+	return (SUCCESS);
+}
+
+static BYTE initSvc(void) {
 	registerServiceHandler();
-	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS; // Really useful ?
+	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	sendStatus(SERVICE_START_PENDING, NONE);
+
+	if (!createSvcStopEvent()) {
+		sendStatus(SERVICE_STOPPED, NONE);
+		return (FAILURE);
+	}
+	return (SUCCESS);
 }
 
 /* WINAPI ServiceMain() */
 VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
-	initSvc();
+	if (!initSvc())
+		return ;
 
-	if (!launchProcess(WINKEY_PATH))
+	if (!launchProcess(WINKEY_PATH)) {
+
 		sendStatus(SERVICE_STOPPED, NONE);
-	else {
-		journalReport("Entering loop\n");
+		return ;
+
+	} else {
+
+		journalReport("Entering main loop\n");
 		sendStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP);
+
 		while (true) {
-			journalReport("Waiting for single object\n");
-			WaitForSingleObject(tinky.svcStatusHandle, INFINITE);
+			WaitForSingleObject(tinky.tinkyStopEventHandle, INFINITE);
 			journalReport(string("Process tinky stop event\n").c_str());
 			if (!SetEvent(tinky.winkeyStopEventHandle))
 				journalReport("Sending stop failed\n");
-			journalReport("Process winkey stop event sent\n");
+			else
+				journalReport("Process winkey stop event sent\n");
 			sendStatus(SERVICE_STOPPED, NONE);
-			break ; // Useless loop ?
+			return ; // Useless loop ?
 		}
 	}
 	(void)dwNumServicesArgs, (void)lpServiceArgVectors;

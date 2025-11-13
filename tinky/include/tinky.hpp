@@ -43,6 +43,7 @@ typedef struct tinky {
 	PROCESS_INFORMATION		processInfo;
 	// }
 }	tinky_t;
+#pragma pack()
 // ============================================= //
 
 // =============== createService.cpp ===============//

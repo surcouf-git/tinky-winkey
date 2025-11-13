@@ -2,52 +2,57 @@
 #include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+HANDLE journalHandle = NULL;
 
 void journalReport(const char *msg) {
 	ReportEventA(
-		journalHandle,                    // Handle de RegisterEventSourceA
-		EVENTLOG_INFORMATION_TYPE,    // Type: INFO, WARNING ou ERROR
-		0,                            // Catégorie (mettez 0)
-		0,                            // Event ID (mettez 0 ou un code perso)
-		NULL,                         // SID (mettez NULL)
-		1,                            // Nombre de strings (1 pour un message simple)
-		0,                            // Taille données binaires (mettez 0)
-		&msg,                     // Adresse du pointeur vers votre string
-		NULL                          // Données binaires (mettez NULL)
+		journalHandle,
+		EVENTLOG_INFORMATION_TYPE,
+		0,
+		0,
+		NULL,
+		1,
+		0,
+		&msg,
+		NULL
 	);
 }
 
 int main(int argc, char* argv[]) {
-	std::cout << "Hey !\n";
-	FILE *file = fopen ("C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\file", "w+");
-	if (!file)
-		std::cout << "Failed to open file\n";
+	journalHandle = RegisterEventSourceA(NULL, "Winkey");
+	journalReport("Hey !\n");
+	journalReport(std::string("argv[0]: " + std::string(argv[0])).c_str());
+
 
 	HANDLE eventHandler = OpenEventA(
 		SYNCHRONIZE,
 		FALSE,
-		(LPCSTR)argv[1]
+		(LPCSTR)argv[0]
 	);
 
+	DWORD err = GetLastError();
+	char result[10] = {};
+	itoa(err, result, 10);
 	if (!eventHandler) {
-		std::cout << "(2) handle null code: " << GetLastError() << '\n';
+		journalReport(std::string("(2) handle null: " + std::string(result) + "\n").c_str());
 	} else {
+		memset(result, 0, 10);
 		DWORD beuteu = 0;
 		while (true) {
-			std::cout << "(2) in loop\n";
+			journalReport("(2) in loop\n");
 			beuteu = WaitForSingleObject(eventHandler, 100);
-			std::cout << "(2) received: " << beuteu << "\n";
+			itoa(beuteu, result, 10);
+			journalReport(std::string("(2) received\n" + std::string(result)).c_str());
 			if (beuteu == 0) {
-				std::cout << "Signal received, shutting down\n";
+				journalReport("Signal received, shutting down\n");
 				break ;
 			}
-			if (!fprintf(file, "1\n"))
-				std::cout << "Cant write in\n";
-			fflush(file);
-			std::cout << "Living my best life\n";
+			journalReport("Living my best life\n");
 			Sleep(1000);
 		}
 	}
-	std::cout << "(2) process2 termine proprement" << std::endl;
+	journalReport("(2) process2 termine proprement\n");
 	return 0;
 }
