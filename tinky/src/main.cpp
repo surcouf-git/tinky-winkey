@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void cleanExit(tinky_t *tinky) {
+static void cleanExit(tinky_t *tinky) {
 	if (tinky->HServiceControlManager) {
 		wcerr << "Closing HSCM\n";
 		if (!CloseServiceHandle(tinky->HServiceControlManager))
@@ -19,23 +19,27 @@ void cleanExit(tinky_t *tinky) {
 
 tinky_t tinky = {};
 
+HANDLE journalHandle = NULL;
+
 int __cdecl main(int argc, char **argv) {
 
 	if (argc == 1) { /* Service Console Manager Call */
 
+		journalHandle = RegisterEventSourceA(NULL, "Tinky"); // JOURNAL
+		journalReport("Je suis bien demarre\n");
 		startedBySCM();
 
 	} else if (argc == 2) { /* Console Call */
 
 		char *args[] = { "install", "start", "stop", "delete" };
-		int (*funcPtr[NFUNC]) (tinky_t *) = { &install, &start, NULL, NULL };
+		int (*funcPtr[NFUNC]) (void) = { &install, &start, NULL, NULL };
 		
 		bool isJobDone = false;
 
 		for (int i = 0; i < NFUNC; i++) {
 			if (!strcmp(argv[1], args[i])) {
 				cout << "Doing job (" << args[i] << ")\n";
-				funcPtr[i](&tinky);
+				funcPtr[i]();
 				isJobDone = true;
 				cout << "Job done (" << args[i] << ")\n";
 			}

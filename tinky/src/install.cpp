@@ -4,21 +4,23 @@
 
 using namespace std;
 
-static int openSCM(tinky_t *tinky) {
-	tinky->HServiceControlManager = OpenSCManager(NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE); // SC_MANAGER_ALL_ACCESS
-	if (!tinky->HServiceControlManager) {
+extern tinky_t tinky;
+
+static int openSCM(void) {
+	tinky.HServiceControlManager = OpenSCManager(NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE); // SC_MANAGER_ALL_ACCESS
+	if (!tinky.HServiceControlManager) {
 		wcerr << "Error while accessing Service Control Manager\n";
 		return (FAILURE);
 	}
 	return (SUCCESS);
 }
 
-static int createService(tinky_t *tinky) {
-	if (!openSCM(tinky))
+static int createService(void) {
+	if (!openSCM())
 		return (FAILURE);
 	
-	tinky->HService = CreateServiceA(
-		tinky->HServiceControlManager,
+	tinky.HService = CreateServiceA(
+		tinky.HServiceControlManager,
 		SVC_NAME,
 		SVC_NAME,
 		SC_MANAGER_ALL_ACCESS,
@@ -32,8 +34,8 @@ static int createService(tinky_t *tinky) {
 		NULL,
 		NULL
 	);
-	if (!tinky->HService) {
-		cerr << "CreateServiceA returned: " << tinky->HService << " (failure)" << '\n'; // Remove
+	if (!tinky.HService) {
+		cerr << "CreateServiceA returned: " << tinky.HService << " (failure)" << '\n'; // Remove
 		DWORD code = GetLastError();
 		if (code == ERROR_SERVICE_EXISTS)
 			wcerr << L"Service tinky already exist\n";
@@ -42,8 +44,8 @@ static int createService(tinky_t *tinky) {
 	return (SUCCESS);
 }
 
-int install(tinky_t *tinky) {
-	if (!createService(tinky))
+int install(void) {
+	if (!createService())
 		return (FAILURE);
 	return (SUCCESS);
 }

@@ -67,13 +67,14 @@ static BYTE launchProcess(const char *processPath) {
 		&tinky.startupInfo,
 		&tinky.processInfo
 	)) {
-		LogToFile("Service failed to launch\n");
+		journalReport("Service failed to launch\n");
 		return (FAILURE);
 		//WaitForSingleObject(pi.hProcess, INFINITE);
 
 		//CloseHandle(pi.hProcess);
 		//CloseHandle(pi.hThread);
 	}
+	journalReport("Process launched\n");
 	return (SUCCESS);
 }
 
@@ -90,11 +91,15 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 	if (!launchProcess(WINKEY_PATH))
 		sendStatus(SERVICE_STOPPED, NONE);
 	else {
+		journalReport("Entering loop\n");
 		sendStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP);
 		while (true) {
-			WaitForSingleObject(tinky.tinkyStopEventHandle, INFINITE);
+			journalReport("Waiting for single object\n");
+			WaitForSingleObject(tinky.svcStatusHandle, INFINITE);
+			journalReport(string("Process tinky stop event\n").c_str());
 			if (!SetEvent(tinky.winkeyStopEventHandle))
-				LogToFile("Sending stop failed\n");
+				journalReport("Sending stop failed\n");
+			journalReport("Process winkey stop event sent\n");
 			sendStatus(SERVICE_STOPPED, NONE);
 			break ; // Useless loop ?
 		}
@@ -102,7 +107,7 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 	(void)dwNumServicesArgs, (void)lpServiceArgVectors;
 }
 
-/* SERVICE_TABLE_ENTRY = array of services (name + funcptr)*/
+/* SERVICE_TABLE_ENTRY = array of services (name + funcptr) */
 static void initTableEntry(SERVICE_TABLE_ENTRYA svcTableEntry[]) {
 	svcTableEntry[0].lpServiceName = SVC_NAME;
 	svcTableEntry[0].lpServiceProc = &serviceMain;
@@ -113,14 +118,13 @@ static void initTableEntry(SERVICE_TABLE_ENTRYA svcTableEntry[]) {
 
 /* https://learn.microsoft.com/fr-fr/windows/win32/services/service-entry-point */
 int startedBySCM(void) {
-	LogToFile("Entering start\n");
+	journalReport("Entering start\n");
 	SERVICE_TABLE_ENTRYA svcTableEntry[2] = {};
 
 	initTableEntry(svcTableEntry);
 	if (!StartServiceCtrlDispatcherA(svcTableEntry)) {
 
-		string str("Error while StartServiceCtrl" + GetLastError() + '\n');
-		LogToFile(str.c_str());
+		journalReport(string("Error while StartServiceCtrl" + GetLastError() + '\n').c_str());
 
 		DWORD lastErr = GetLastError();
 		switch (lastErr) {

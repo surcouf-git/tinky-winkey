@@ -5,6 +5,8 @@
 
 using namespace std;
 
+extern HANDLE journalHandle;
+
 void trackMemoryLeaks(void) {
 #define _CRTDBG_MAP_ALLOC
 #include <cstdlib>
@@ -39,4 +41,18 @@ void LogToFile(const char* message) {
 				st.wHour, st.wMinute, st.wSecond, message);
 		fclose(f);
 	}
+}
+
+void journalReport(const char *msg) {
+	ReportEventA(
+		journalHandle,                    // Handle de RegisterEventSourceA
+		EVENTLOG_INFORMATION_TYPE,    // Type: INFO, WARNING ou ERROR
+		0,                            // Catégorie (mettez 0)
+		0,                            // Event ID (mettez 0 ou un code perso)
+		NULL,                         // SID (mettez NULL)
+		1,                            // Nombre de strings (1 pour un message simple)
+		0,                            // Taille données binaires (mettez 0)
+		&msg,                     // Adresse du pointeur vers votre string
+		NULL                          // Données binaires (mettez NULL)
+	);
 }

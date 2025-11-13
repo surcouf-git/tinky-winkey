@@ -2,8 +2,7 @@
 
 using namespace std;
 
-int start(tinky_t *tinky) {
-	(void)tinky;
+int start(void) {
 	cout << "Inside start\n";
 	return (0);
 }

@@ -46,10 +46,10 @@ typedef struct tinky {
 // ============================================= //
 
 // =============== createService.cpp ===============//
-int install(tinky_t *tinky);
+int install(void);
 // =============== start.cpp =============== //
-int start(tinky_t *tinky);
-
+int start(void);
 // =============== service control managed =============== //
 #define BIN_NAME ".\\winkey"
 int startedBySCM(void);
+void journalReport(const char *msg);
