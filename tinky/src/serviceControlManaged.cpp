@@ -17,6 +17,8 @@ DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEven
 		case (SERVICE_CONTROL_INTERROGATE):
 			return (NO_ERROR);
 		case (SERVICE_CONTROL_STOP):
+			SetEvent(tinky.tinkyStopEventHandle);
+			SetEvent(tinky.winkeyStopEventHandle);
 			return (NO_ERROR);
 	}
 	(void)dwEventType; // Event type, handle only if dwControl == SERVICE_CONTROL_SESSIONCHANGE
@@ -60,7 +62,7 @@ static BYTE launchProcess(const char *processPath) {
 
 	if (!CreateProcessA(
 		processPath, // GetCurrentDirectory() ?
-		WINKEY_STOP, // NameSpace Global ?
+		NULL,
 		NULL, NULL,
 		FALSE,
 		0, NULL, NULL,
@@ -122,10 +124,6 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 		while (true) {
 			WaitForSingleObject(tinky.tinkyStopEventHandle, INFINITE);
 			journalReport(string("Process tinky stop event\n").c_str());
-			if (!SetEvent(tinky.winkeyStopEventHandle))
-				journalReport("Sending stop failed\n");
-			else
-				journalReport("Process winkey stop event sent\n");
 			sendStatus(SERVICE_STOPPED, NONE);
 			return ; // Useless loop ?
 		}

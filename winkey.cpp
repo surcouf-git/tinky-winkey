@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define WINKEY_STOP "Global\\stop_winkey_process"
+
 HANDLE journalHandle = NULL;
 
 void journalReport(const char *msg) {
@@ -29,7 +31,7 @@ int main(int argc, char* argv[]) {
 	HANDLE eventHandler = OpenEventA(
 		SYNCHRONIZE,
 		FALSE,
-		(LPCSTR)argv[0]
+		WINKEY_STOP
 	);
 
 	DWORD err = GetLastError();

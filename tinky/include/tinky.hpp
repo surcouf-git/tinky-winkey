@@ -10,7 +10,7 @@
 //#include "unicode.h"
 
 // =============== Magic variables ========== //
-#define WINKEY_STOP "Global\\stop_winkey_process"
+#define WINKEY_STOP "Global\\stop_winkey_process"  // NameSpace Global ?
 #define LOCALSYS TEXT("surcouf\\LocalSystem")
 #define SVC_NAME "tinky"
 #define WINKEY_PATH "C:\\Users\\surcouf\\Desktop\\workspace-42\\tinky-winkey\\winkey.exe"
