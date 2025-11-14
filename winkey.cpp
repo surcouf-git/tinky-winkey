@@ -43,15 +43,12 @@ int main(int argc, char* argv[]) {
 		memset(result, 0, 10);
 		DWORD beuteu = 0;
 		while (true) {
-			journalReport("(2) in loop\n");
 			beuteu = WaitForSingleObject(eventHandler, 100);
 			itoa(beuteu, result, 10);
-			journalReport(std::string("(2) received\n" + std::string(result)).c_str());
 			if (beuteu == 0) {
 				journalReport("Signal received, shutting down\n");
 				break ;
 			}
-			journalReport("Living my best life\n");
 			Sleep(1000);
 		}
 	}

@@ -1,0 +1,35 @@
+Arthur: pour winkey, dans ton programme, la condition qui te permettras de sortir correctement 
+		de ton while (true) c'est la fonction 'WaitForSingleObject(eventHandler, 1000);' tu recuperes
+		le 'eventHandler' via 'OpenEventA(SYNCHRONIZE, FALSE, WINKEY_STOP);'.
+		
+		Ex:
+		#define WINKEY_STOP "Global\\stop_winkey_process"
+
+		main_loop () {
+			HANDLE eventHandler = OpenEventA(SYNCHRONIZE, FALSE, WINKEY_STOP);
+			if (!eventHandler)
+				return (failedToOpenStopEvent());
+
+			while (true) {
+				if (!WaitForSingleObject(eventHandler, 1000)) {
+					// signal d'arret de winkey recu
+					freeAndCloseAll();
+					return ;
+				} else {
+					// Tes fonctions qui continuent a log
+					keyLogger();
+				}
+			}
+		}
+
+		Les HANDLE peuvent leak, y'a des fonctions pour les fermer, celle que je connais:
+		'CloseHandle(handler);'
+
+CA TE SERA UTILE:
+	https://learn.microsoft.com/en-us/windows/win32/learnwin32/introduction-to-windows-programming-in-c--
+
+Ya aussi les versions FR (bancales) de toutes les pages de doc faut juste changer la partie
+'en-us' du lien par 'fr'
+
+Si tu cherches de la doc, te trompes pas: ce qui nous interesse nous c'est la WIN32 api, pas .NET ni 
+WIN UI ...etc; pcq ca te renvoie toujours vers ca quand tu cherches

