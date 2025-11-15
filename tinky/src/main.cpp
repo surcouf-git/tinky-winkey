@@ -4,16 +4,14 @@
 using namespace std;
 
 static void cleanExit(tinky_t *tinky) {
-	if (tinky->HServiceControlManager) {
-		wcerr << "Closing HSCM\n";
-		if (!CloseServiceHandle(tinky->HServiceControlManager))
-			wcerr << L"Failed to close the Service Control Manager Handle\n";
+	if (tinky->scmHandler) {
+		if (!CloseServiceHandle(tinky->scmHandler))
+			cerr << "Failed to close the Service Control Manager Handle\n";
 	}
 
-	if (tinky->HService) {
-		wcerr << "Closing SVC\n";
-		if (!CloseServiceHandle(tinky->HService))
-			wcerr << L"Failed to close the Service Control Manager Handle\n";
+	if (tinky->serviceHandler) {
+		if (!CloseServiceHandle(tinky->serviceHandler))
+			cerr << "Failed to close the Service Control Manager Handle\n";
 	}
 }
 
@@ -26,22 +24,19 @@ int __cdecl main(int argc, char **argv) {
 	if (argc == 1) { /* Service Console Manager Call */
 
 		journalHandle = RegisterEventSourceA(NULL, "Tinky"); // JOURNAL
-		journalReport("Je suis bien demarre\n");
 		startedBySCM();
 
 	} else if (argc == 2) { /* Console Call */
 
 		char *args[] = { "install", "start", "stop", "delete" };
-		int (*funcPtr[NFUNC]) (void) = { &install, &start, NULL, NULL };
+		int (*funcPtr[NFUNC]) (void) = { &install, &start, &stop, &uninstall };
 		
 		bool isJobDone = false;
 
 		for (int i = 0; i < NFUNC; i++) {
 			if (!strcmp(argv[1], args[i])) {
-				cout << "Doing job (" << args[i] << ")\n";
 				funcPtr[i]();
 				isJobDone = true;
-				cout << "Job done (" << args[i] << ")\n";
 			}
 		}
 		if (isJobDone == false) return (printErr(EINARG, argv[1]));

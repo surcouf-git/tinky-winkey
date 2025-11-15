@@ -17,16 +17,16 @@ static void stopTinkyWinkey(void) {
 	SetEvent(tinky.tinkyStopEventHandle);
 	SetEvent(tinky.winkeyStopEventHandle);
 
+	if (!TerminateProcess(tinky.processInfo.hProcess, NONE)) {
+		journalReport(string("Terminate process failed with code: ") + itostring(GetLastError()) + string("\n"));
+	} // is it needed if the process stop by himself ?
+
 	if (tinky.processInfo.hProcess)
 		CloseHandle(tinky.processInfo.hProcess);
 
 	if (tinky.processInfo.hThread)
 		CloseHandle(tinky.processInfo.hThread);
 
-	//if (!TerminateProcess(tinky.processInfo.hProcess, NONE)) {
-	//	journalReport(string("Terminate process failed with code: ") + itostring(GetLastError()) + string("\n"));
-	//}
-	// is it needed if the process stop by himself ?
 	sendStatus(SERVICE_STOPPED, NONE);
 }
 
@@ -75,8 +75,7 @@ static BYTE launchProcess() {
 
 	if (!CreateProcessA(
 		processPath.c_str(),
-		NULL,
-		NULL, NULL,
+		NULL, NULL, NULL,
 		FALSE,
 		0, NULL, NULL,
 		&tinky.startupInfo,

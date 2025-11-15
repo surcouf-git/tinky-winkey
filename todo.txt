@@ -1,0 +1,4 @@
+Checker les bugs (essayer de start via powershell alors que c'est deja start, pareil pour stop, delete...)
+Voir impersonate token et pourquoi s'en servir
+Checker si winkey.exe est deja dans HIDING_PATH avant d'essayer de le bouger ?
+Voir pourquoi winkey.exe n'apparait pas dans HIDING_PATH via l'explorateur de fichiers mais apparait dans un ls via powershell
