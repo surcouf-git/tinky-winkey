@@ -36,7 +36,8 @@ void LogToFile(const char* message) {
 	}
 }
 
-void journalReport(const char *msg) {
+void journalReport(string msg) {
+	const char *ptr = msg.c_str();
 	ReportEventA(
 		journalHandle,
 		EVENTLOG_INFORMATION_TYPE,
@@ -45,7 +46,20 @@ void journalReport(const char *msg) {
 		NULL,
 		1,
 		0,
-		&msg,
+		&ptr,
 		NULL
 	);
+}
+
+string itostring(DWORD i) {
+	char buffer[16] = {};
+	itoa((int)i, buffer, 10);
+	return (string(buffer));
+}
+
+string getServicePath(const string name) {
+	char currentDirectory[MAX_PATH] = {};
+
+	GetCurrentDirectoryA(MAX_PATH, currentDirectory);
+	return (string (currentDirectory + string("\\") + name + string(".exe")));
 }
