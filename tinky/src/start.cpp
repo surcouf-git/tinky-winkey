@@ -1,4 +1,6 @@
 #include "tinky.hpp"
+#include "utils.hpp"
+#include <tlhelp32.h>
 
 using namespace std;
 
@@ -18,6 +20,6 @@ int start(void) {
 			cerr	<< "Error code: " << GetLastError() << "\n";
 		return (FAILURE);
 	}
-	cout	<< "Service started successfully\n";
+	journalReport(L"Service started successfully\n");
 	return (SUCCESS);
 }

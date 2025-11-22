@@ -5,7 +5,7 @@ using namespace std;
 extern tinky_t tinky;
 
 static int openService(DWORD desiredAccess) {
-	tinky.serviceHandler = OpenServiceA(
+	tinky.serviceHandler = OpenServiceW(
 		tinky.scmHandler,
 		SVC_NAME,
 		desiredAccess

@@ -18,7 +18,7 @@ static void stopTinkyWinkey(void) {
 	SetEvent(tinky.winkeyStopEventHandle);
 
 	if (!TerminateProcess(tinky.processInfo.hProcess, NONE)) {
-		journalReport(string("Terminate process failed with code: ") + itostring(GetLastError()) + string("\n"));
+		journalReport(wstring(L"Terminate process failed with code: ") + itostring(GetLastError()) + wstring(L"\n"));
 	} // is it needed if the process stop by himself ?
 
 	if (tinky.processInfo.hProcess)
@@ -53,15 +53,15 @@ DWORD WINAPI controlHandler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventDa
 }
 
 static void registerControlHandler(void) {
-	tinky.svcStatusHandle = RegisterServiceCtrlHandlerExA(
+	tinky.svcStatusHandle = RegisterServiceCtrlHandlerExW(
 				SVC_NAME,
 				&controlHandler,
 				NULL
 			);
 }
 
-static HANDLE createEvent(const char *eventName) {
-	return CreateEventA(
+static HANDLE createEvent(const wchar_t *eventName) {
+	return CreateEventW(
 		NULL,
 		FALSE,
 		FALSE,
@@ -70,25 +70,28 @@ static HANDLE createEvent(const char *eventName) {
 }
 
 static BYTE launchProcess() {
-	string processPath = getServicePath(KYLG_NAME);
-	journalReport("Found process path: " + processPath);
+	wstring processPath = getServicePath(KYLG_NAME);
+	journalReport(L"Found process path: " + processPath);
 
-	if (!CreateProcessA(
+	if (!CreateProcessAsUserW(
+		tinky.systemToken,
 		processPath.c_str(),
 		NULL, NULL, NULL,
 		FALSE,
-		0, NULL, NULL,
+		CREATE_NO_WINDOW,
+		NULL, NULL,
 		&tinky.startupInfo,
 		&tinky.processInfo
 	)) {
-		journalReport("Process failed to launch with code: \n" + itostring(GetLastError()));
+		journalReport(L"Process failed to launch with code: \n" + itostring(GetLastError()));
 		return (FAILURE);
 	}
-	journalReport("Process launched\n");
+	journalReport(L"Process launched\n");
 	return (SUCCESS);
 }
 
 static BYTE initService(void) {
+	impersonate();
 	registerControlHandler();
 	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	sendStatus(SERVICE_START_PENDING, NONE);
@@ -99,7 +102,7 @@ static BYTE initService(void) {
 }
 
 /* WINAPI ServiceMain() */
-VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
+VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPWSTR *lpServiceArgVectors) {
 	if (!initService())
 		return ;
 
@@ -115,7 +118,7 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 		while (true) {
 
 			WaitForSingleObject(tinky.tinkyStopEventHandle, INFINITE);
-			journalReport(string("Process tinky stop event\n").c_str());
+			journalReport(wstring(L"Process tinky stop event\n").c_str());
 			return ;
 
 		}
@@ -124,7 +127,7 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPSTR *lpServiceArgVectors) {
 }
 
 /* SERVICE_TABLE_ENTRY = array of services (name + funcptr) */
-static void initTableEntry(SERVICE_TABLE_ENTRYA svcTableEntry[]) {
+static void initTableEntry(SERVICE_TABLE_ENTRYW *svcTableEntry) {
 	svcTableEntry[0].lpServiceName = SVC_NAME;
 	svcTableEntry[0].lpServiceProc = &serviceMain;
 
@@ -134,13 +137,13 @@ static void initTableEntry(SERVICE_TABLE_ENTRYA svcTableEntry[]) {
 
 /* https://learn.microsoft.com/fr-fr/windows/win32/services/service-entry-point */
 int startedBySCM(void) {
-	journalReport("Entering start\n");
-	SERVICE_TABLE_ENTRYA svcTableEntry[2] = {};
+	journalReport(L"Entering start\n");
+	SERVICE_TABLE_ENTRYW svcTableEntry[2] = {};
 
 	initTableEntry(svcTableEntry);
-	if (!StartServiceCtrlDispatcherA(svcTableEntry)) {
+	if (!StartServiceCtrlDispatcherW(svcTableEntry)) {
 
-		journalReport(string("Error while StartServiceCtrl" + GetLastError() + '\n').c_str());
+		journalReport(wstring(L"Error while StartServiceCtrl" + GetLastError() + '\n').c_str());
 
 		DWORD lastErr = GetLastError();
 		switch (lastErr) {

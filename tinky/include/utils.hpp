@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -12,8 +13,8 @@ int printErr(int wich, char *what);
 #define DEBUG_FILE "C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\svc_debug.log"
 void LogToFile(const char* message);
 
-void journalReport(string msg);
+void journalReport(wstring msg);
 
-string itostring(DWORD i);
+wstring itostring(DWORD i);
 
-string getServicePath(const string name);
+wstring getServicePath(const wstring name);
