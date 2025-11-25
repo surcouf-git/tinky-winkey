@@ -3,7 +3,7 @@
 #define UNICODE // Keep ?
 #define _UNICODE // Keep ?
 
-#include "winMandatory.h"
+//#include "winMandatory.h"
 #include <windows.h>
 #include <iostream>
 
@@ -27,7 +27,7 @@
 // ============================================= //
 
 // =============== Structs =============== //
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct tinky {
 	// install {
 	SC_HANDLE	scmHandler;
@@ -49,7 +49,7 @@ typedef struct tinky {
 	PROCESS_INFORMATION		processInfo;
 	// }
 }	tinky_t;
-#pragma pack()
+//#pragma pack()
 // ============================================= //
 
 // =============== cmdLineControlManaged.cpp =============== //

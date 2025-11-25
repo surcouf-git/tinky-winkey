@@ -1,5 +1,5 @@
 #include <iostream>
-#include "winMandatory.h"
+//#include "winMandatory.h"
 #include <windows.h>
 #include "utils.hpp"
 
@@ -25,17 +25,6 @@ int printErr(int wich, char *what) {
 	return (EXIT_FAILURE);
 }
 
-void LogToFile(const char* message) {
-	FILE* f = fopen(DEBUG_FILE, "a");
-	if (f) {
-		SYSTEMTIME st;
-		GetLocalTime(&st);
-		fprintf(f, "[%02d:%02d:%02d] %s\n", 
-				st.wHour, st.wMinute, st.wSecond, message);
-		fclose(f);
-	}
-}
-
 void journalReport(wstring msg) {
 	const wchar_t *ptr = msg.c_str();
 	ReportEventW(
@@ -53,7 +42,7 @@ void journalReport(wstring msg) {
 
 wstring itostring(DWORD i) {
 	char buffer[16] = {};
-	itoa((int)i, buffer, 10);
+	_itoa_s((int)i, buffer, 10);
 	return (wstring((wchar_t *)buffer));
 }
 

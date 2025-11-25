@@ -1,6 +1,6 @@
 #pragma once
 
-#include "winMandatory.h"
+//#include "winMandatory.h"
 #include <windows.h>
 
 #ifdef UNICODE

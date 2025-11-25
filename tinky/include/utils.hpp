@@ -10,9 +10,6 @@ int printUsage(void);
 #define EINARG 1
 int printErr(int wich, char *what);
 
-#define DEBUG_FILE "C:\\Users\\keylogger\\Desktop\\trash\\tinky-winkey\\svc_debug.log"
-void LogToFile(const char* message);
-
 void journalReport(wstring msg);
 
 wstring itostring(DWORD i);
