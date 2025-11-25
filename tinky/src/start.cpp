@@ -12,7 +12,7 @@ int start(void) {
 	if (!initControl())
 		return (FAILURE);
 
-	if (!StartServiceA(tinky.serviceHandler, NONE, NO_ARGS)) {
+	if (!StartServiceW(tinky.serviceHandler, NONE, NO_ARGS)) {
 		cerr	<< "Failed to start service...";
 		if (GetLastError() == ERROR_SERVICE_ALREADY_RUNNING)
 			cerr	<< "Service already running !\n";

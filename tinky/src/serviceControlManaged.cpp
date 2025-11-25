@@ -32,9 +32,6 @@ static void stopTinkyWinkey(void) {
 
 /* https://learn.microsoft.com/fr-fr/windows/win32/api/winsvc/nc-winsvc-lphandler_function_ex */
 DWORD WINAPI controlHandler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext) {
-	// TODO s
-	// Handle SERVICE_CONTROL_PAUSE ?
-	// Handle SERVICE_CONTROL_SESSIONCHANGE !
 	switch(dwControl) {
 		case (SERVICE_CONTROL_INTERROGATE):
 			return (NO_ERROR);
@@ -143,9 +140,9 @@ int startedBySCM(void) {
 	initTableEntry(svcTableEntry);
 	if (!StartServiceCtrlDispatcherW(svcTableEntry)) {
 
-		journalReport(wstring(L"Error while StartServiceCtrl" + GetLastError() + '\n').c_str());
-
 		DWORD lastErr = GetLastError();
+		journalReport(wstring(L"Error while StartServiceCtrl" + lastErr + '\n').c_str());
+
 		switch (lastErr) {
 			case (ERROR_INVALID_DATA):
 				cerr << "Invalid svcTableEntry data\n"; // These must be signal sending ?

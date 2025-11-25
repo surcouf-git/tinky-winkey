@@ -24,8 +24,8 @@ int __cdecl main(int argc, char **argv) {
 	if (argc == 1) { /* Service Console Manager Call */
 
 		journalHandle = RegisterEventSourceA(NULL, "Tinky"); // JOURNAL
-		startedBySCM();
-		return (EXIT_SUCCESS);
+		return (startedBySCM());
+
 
 	} else if (argc == 2) { /* Console Call */
 
@@ -43,6 +43,8 @@ int __cdecl main(int argc, char **argv) {
 		if (isJobDone == false) return (printErr(EINARG, argv[1]));
 		cleanExit(&tinky);
 		return (EXIT_SUCCESS);
+	} else {
+		printUsage();
 	}
 	return (EXIT_FAILURE);
 }

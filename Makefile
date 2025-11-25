@@ -1,7 +1,7 @@
 #Thanks to Claude
 
 # Configuration
-TINKY_NAME = tinky.exe
+TINKY_NAME = svc.exe
 WINKEY_NAME = winkey.exe
 TINKY_INCL = /I tinky\include
 COMPILER = cl.exe
@@ -55,6 +55,6 @@ clean:
 	if exist *.pdb del /Q *.pdb
 
 distclean: clean
-	@if exist $(OBJDIR) rmdir /Q $(OBJDIR)
+	if exist $(OBJDIR) rmdir /Q $(OBJDIR)
 
 .PHONY: all clean distclean
