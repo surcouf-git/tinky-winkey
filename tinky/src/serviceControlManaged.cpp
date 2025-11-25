@@ -147,14 +147,14 @@ int startedBySCM(void) {
 
 		DWORD lastErr = GetLastError();
 		switch (lastErr) {
-			case (ERROR_FAILED_SERVICE_CONTROLLER_CONNECT):
-				printUsage();
-				break ;
 			case (ERROR_INVALID_DATA):
 				cerr << "Invalid svcTableEntry data\n"; // These must be signal sending ?
 				break ;
 			case (ERROR_SERVICE_ALREADY_RUNNING):
 				cerr << "Service is already running\n"; // These must be signal sending ?
+				break ;
+			default:
+				printUsage();
 				break ;
 		}
 		return (FAILURE);

@@ -25,6 +25,7 @@ int __cdecl main(int argc, char **argv) {
 
 		journalHandle = RegisterEventSourceA(NULL, "Tinky"); // JOURNAL
 		startedBySCM();
+		return (EXIT_SUCCESS);
 
 	} else if (argc == 2) { /* Console Call */
 
