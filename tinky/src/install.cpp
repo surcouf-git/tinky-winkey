@@ -7,7 +7,7 @@ using namespace std;
 extern tinky_t tinky;
 
 int openSCM(DWORD desiredAccess) {
-	tinky.scmHandler = OpenSCManagerA(NULL, SERVICES_ACTIVE_DATABASEA, desiredAccess);
+	tinky.scmHandler = OpenSCManagerW(NULL, SERVICES_ACTIVE_DATABASEW, desiredAccess);
 	if (!tinky.scmHandler) {
 		cerr	<< "Error while accessing Service Control Manager... Error code: " << GetLastError() << "\n";
 		return (FAILURE);
