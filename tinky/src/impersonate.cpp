@@ -5,6 +5,7 @@
 using namespace std;
 
 extern tinky_t tinky;
+extern processes_t processes;
 
 static DWORD findProcessId(const wchar_t *process_name)
 {
@@ -43,7 +44,8 @@ void impersonate(void) {
 
 	if (winlogonHandle == INVALID_HANDLE_VALUE)
 		journalReport(L"Failed to open process... Error code: " + itostring(GetLastError()) + L"\n");
-	if (!OpenProcessToken(winlogonHandle, TOKEN_ALL_ACCESS, &tinky.systemToken))
+	if (!OpenProcessToken(winlogonHandle, TOKEN_ALL_ACCESS, &processes.systemToken))
 		journalReport(L"Failed to open process token... Error code: " + itostring(GetLastError()) + L"\n");
 	journalReport(L"Token impersonate success\n");
+	CloseHandle(winlogonHandle);
 }

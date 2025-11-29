@@ -5,7 +5,7 @@
 #include <ctime>
 #include <iomanip>
 
-#define WINKEY_STOP "Global\\stop_winkey_process"
+#define PROCESS_STOP "Global\\stop_tinky_processes"
 
 using namespace std;
 
@@ -149,7 +149,7 @@ int main() {
 	HANDLE eventHandler = OpenEventA(
 		SYNCHRONIZE,
 		FALSE,
-		WINKEY_STOP
+		PROCESS_STOP
 	);
 
 	while (GetMessage(&msg, NULL, 0, 0)) {

