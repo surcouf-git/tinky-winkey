@@ -1,6 +1,7 @@
 #include "tinky.hpp"
 #include "utils.hpp"
 #include <tlhelp32.h>
+#include "processes.h"
 
 using namespace std;
 

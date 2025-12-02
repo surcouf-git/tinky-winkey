@@ -11,7 +11,7 @@ extern tinky_t tinky;
 //}
 
 // delete() was taken..lol
-int uninstall(void) {
+int uninstall(void**) {
 	cout	<< "Deleting service from service control manager...\n";
 
 	if (!initControl())

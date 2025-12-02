@@ -1,5 +1,6 @@
 #include "tinky.hpp"
 #include "utils.hpp"
+#include "processes.h"
 
 using namespace std;
 
@@ -89,7 +90,7 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPWSTR *lpServiceArgVectors) {
 	if (!initService())
 		return ;
 
-	if (!launchProcess(dwNumServicesArgs, lpServiceArgVectors)) {
+	if (!launchProcesses(dwNumServicesArgs, lpServiceArgVectors)) {
 
 		sendStatus(SERVICE_STOPPED, NONE);
 		return ;
