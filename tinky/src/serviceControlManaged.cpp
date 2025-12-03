@@ -35,11 +35,14 @@ static void stopAllProcesses(void) {
 
 	if (tinky.tinkyStopEventHandle)
 		CloseHandle(tinky.tinkyStopEventHandle);
+
+	if (processes.stopEventHandle)
+		CloseHandle(processes.stopEventHandle);
 	sendStatus(SERVICE_STOPPED, NONE);
 }
 
 /* https://learn.microsoft.com/fr-fr/windows/win32/api/winsvc/nc-winsvc-lphandler_function_ex */
-DWORD WINAPI controlHandler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventData, LPVOID lpContext) {
+DWORD WINAPI controlHandler(DWORD dwControl, DWORD, LPVOID, LPVOID) {
 	switch(dwControl) {
 		case (SERVICE_CONTROL_INTERROGATE):
 			return (NO_ERROR);
@@ -51,9 +54,6 @@ DWORD WINAPI controlHandler(DWORD dwControl, DWORD dwEventType, LPVOID lpEventDa
 			stopAllProcesses();
 			return (NO_ERROR);
 	}
-	(void)dwEventType; // Event type, handle only if dwControl == SERVICE_CONTROL_SESSIONCHANGE
-	(void)lpEventData; // Same as above
-	(void)lpContext; // Same as RegisterServiceCtrlHandlerEx lpContext (void* user data)
 	return (ERROR_CALL_NOT_IMPLEMENTED);
 }
 
@@ -80,8 +80,8 @@ static BYTE initService(void) {
 	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	sendStatus(SERVICE_START_PENDING, NONE);
 
-	processes.stopEventHandle = createEvent(PROCESSES_STOP);
 	tinky.tinkyStopEventHandle = createEvent(NO_NAME);
+	processes.stopEventHandle = createEvent(PROCESSES_STOP);
 	return (SUCCESS);
 }
 

