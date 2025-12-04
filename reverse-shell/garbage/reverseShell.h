@@ -46,17 +46,34 @@ typedef struct reverseShell {
 	//
 
 	HANDLE	stopEventsignal;
+
+	BOOL				clientFound;
+	CRITICAL_SECTION	lock;
+
 }	reverseShell_t;
+
+//#pragma pack(1)
+typedef struct client {
+	BOOL				found;
+	CRITICAL_SECTION	lock;
+
+	CRITICAL_SECTION	lockStop;
+	BOOL				stop;
+}	client_t;
+//#pragma pack()
 
 // =============== utils ===============
 void journalReport(std::wstring msg);
 BOOL processShouldStop(void);
 
 // =============== threads.cpp ===============
+void notifyStopSignal(void);
 BYTE startRoutines(void);
-BYTE launchThreadsMonitor(void);
+DWORD WINAPI listener(LPVOID);
+DWORD WINAPI sender(LPVOID);
 // =============== networking.cpp ===============
 BYTE initNetworking(void);
+BYTE acceptClient(void);
 // =============== cleanUp.cpp ===============
 void cleanUp(std::wstring name);
 void forceStop(void);

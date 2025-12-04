@@ -8,7 +8,7 @@ RSHELL_INCL = /I reverse-shell\include
 COMPILER = cl.exe
 CFLAGS = /nologo /Wall /WX /EHsc /wd4668 /wd4865 /wd5039 /wd5045 /wd4820
 OBJDIR = obj
-LIBS = Advapi32.lib psapi.lib user32.lib Ws2_32.lib
+LIBS = Advapi32.lib psapi.lib user32.lib Ws2_32.lib Kernel32.lib
 
 TINKY_SRC = tinky\src\*.cpp
 WINKEY_SRC = winkey\winkey.cpp
@@ -27,10 +27,10 @@ TINKY_OBJ = $(OBJDIR)\main.obj \
 
 WINKEY_OBJ = $(OBJDIR)\winkey.obj
 
-RSHELL_OBJ = $(OBJDIR)\reverseShell.obj \
+RSHELL_OBJ = $(OBJDIR)\reverse-shell.obj \
 			$(OBJDIR)\cleanUp.obj \
 			$(OBJDIR)\networking.obj \
-			$(OBJDIR)\threads.obj
+			$(OBJDIR)\routine.obj
 
 all: $(OBJDIR) $(TINKY_NAME) $(WINKEY_NAME) $(RSHELL_NAME)
 

