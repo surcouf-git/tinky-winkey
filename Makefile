@@ -1,21 +1,19 @@
 #Thanks to Claude
 
-# Configuration
 TINKY_NAME = svc.exe
 WINKEY_NAME = winkey.exe
 RSHELL_NAME = safe-shell.exe
 TINKY_INCL = /I tinky\include
+RSHELL_INCL = /I reverse-shell\include
 COMPILER = cl.exe
 CFLAGS = /nologo /Wall /WX /EHsc /wd4668 /wd4865 /wd5039 /wd5045 /wd4820
 OBJDIR = obj
-LIBS = Advapi32.lib psapi.lib user32.lib Ws2_32.lib
+LIBS = Advapi32.lib psapi.lib user32.lib Ws2_32.lib Kernel32.lib
 
-# Sources
 TINKY_SRC = tinky\src\*.cpp
 WINKEY_SRC = winkey\winkey.cpp
-RSHELL_SRC = reverse-shell\reverseShell.cpp
+RSHELL_SRC = reverse-shell\src\*.cpp
 
-# Objets
 TINKY_OBJ = $(OBJDIR)\main.obj \
             $(OBJDIR)\utils.obj \
             $(OBJDIR)\cmdLineManaged.obj \
@@ -25,20 +23,21 @@ TINKY_OBJ = $(OBJDIR)\main.obj \
             $(OBJDIR)\serviceControlManaged.obj \
             $(OBJDIR)\start.obj \
             $(OBJDIR)\stop.obj \
-			$(OBJDIR)\processes.obj
+			$(OBJDIR)\processes.obj \
 
 WINKEY_OBJ = $(OBJDIR)\winkey.obj
 
-RSHELL_OBJ = $(OBJDIR)\reverseShell.obj
+RSHELL_OBJ = $(OBJDIR)\init.obj \
+			$(OBJDIR)\cleanUp.obj \
+			$(OBJDIR)\networking.obj \
+			$(OBJDIR)\run.obj \
+			$(OBJDIR)\newSession.obj
 
-# Règle par défaut
 all: $(OBJDIR) $(TINKY_NAME) $(WINKEY_NAME) $(RSHELL_NAME)
 
-# Créer dossier obj
 $(OBJDIR):
 	if not exist $(OBJDIR) mkdir $(OBJDIR)
 
-# Linker les exécutables
 $(TINKY_NAME): $(TINKY_OBJ)
 	$(COMPILER) $(CFLAGS) /Fe$@ $(TINKY_OBJ) $(LIBS)
 
@@ -48,22 +47,21 @@ $(WINKEY_NAME): $(WINKEY_OBJ)
 $(RSHELL_NAME): $(RSHELL_OBJ)
 	$(COMPILER) $(CFLAGS) /Fe$@ $(RSHELL_OBJ) $(LIBS)
 
-# Règle d'inférence pour tinky
 {tinky\src}.cpp{$(OBJDIR)}.obj:
 	$(COMPILER) $(CFLAGS) $(TINKY_INCL) /c $< /Fo$@
 
-# Règle d'inférence pour winkey
 {winkey}.cpp{$(OBJDIR)}.obj:
 	$(COMPILER) $(CFLAGS) /c $< /Fo$@
 
-{reverse-shell}.cpp{$(OBJDIR)}.obj:
-	$(COMPILER) $(CFLAGS) /c $< /Fo$@
+{reverse-shell\src}.cpp{$(OBJDIR)}.obj:
+	$(COMPILER) $(CFLAGS) $(RSHELL_INCL) /c $< /Fo$@
 
-# Nettoyage
 clean:
 	if exist $(OBJDIR)\*.obj del /Q $(OBJDIR)\*.obj
 	if exist *.exe del /Q *.exe
 	if exist *.pdb del /Q *.pdb
+
+re: clean all
 
 distclean: clean
 	if exist $(OBJDIR) rmdir /Q $(OBJDIR)

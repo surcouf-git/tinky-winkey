@@ -49,7 +49,7 @@ static BYTE movWinkey(void) {
 			FALSE
 		)) {
 
-		cerr	<< "Can't move winkey.exe... error code: "<< GetLastError()
+		cerr	<< "Can't move winkey.exe... error code: "<< GetLastError() << "\n"
 				<< "Failed to create service...\n"
 				<< "\n";
 
@@ -72,9 +72,8 @@ static BYTE moveAdditionalProcesses(void) { // TODO cleanup and refactor that sh
 			FALSE
 		)) {
 
-		cerr	<< "Can't move safe-shell.exe... error code: "<< GetLastError()
-				<< "Failed to create service...\n"
-				<< "\n";
+		cerr	<< "Can't move safe-shell.exe... error code: "<< GetLastError() << "\n"
+				<< "Failed to create service...\n";
 
 		return (FAILURE);
 	}
