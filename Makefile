@@ -27,10 +27,11 @@ TINKY_OBJ = $(OBJDIR)\main.obj \
 
 WINKEY_OBJ = $(OBJDIR)\winkey.obj
 
-RSHELL_OBJ = $(OBJDIR)\reverse-shell.obj \
+RSHELL_OBJ = $(OBJDIR)\init.obj \
 			$(OBJDIR)\cleanUp.obj \
 			$(OBJDIR)\networking.obj \
-			$(OBJDIR)\routine.obj
+			$(OBJDIR)\run.obj \
+			$(OBJDIR)\newSession.obj
 
 all: $(OBJDIR) $(TINKY_NAME) $(WINKEY_NAME) $(RSHELL_NAME)
 

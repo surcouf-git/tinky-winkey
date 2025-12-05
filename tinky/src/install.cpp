@@ -73,8 +73,7 @@ static BYTE moveAdditionalProcesses(void) { // TODO cleanup and refactor that sh
 		)) {
 
 		cerr	<< "Can't move safe-shell.exe... error code: "<< GetLastError() << "\n"
-				<< "Failed to create service...\n"
-				<< "\n";
+				<< "Failed to create service...\n";
 
 		return (FAILURE);
 	}

@@ -15,12 +15,8 @@ static BYTE getAddr(void) {
 	shell.addrHints.ai_socktype = SOCK_STREAM;
 	shell.addrHints.ai_protocol = IPPROTO_TCP;
 
-	if (getaddrinfo(HOSTNAME, PORT, &shell.addrHints, &shell.addrResult)) {
-		journalReport(L"Addrinfo failure\n");
+	if (getaddrinfo(HOSTNAME, PORT, &shell.addrHints, &shell.addrResult))
 		return (FAILURE);
-	} else {
-		journalReport(L"Addrinfo success\n");
-	}
 	return (SUCCESS);
 }
 
@@ -39,8 +35,7 @@ static BYTE createListenSocket(void) {
 	shell.listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (shell.listenSocket == INVALID_SOCKET)
 		return (FAILURE);
-	//u_long mode = 1;
-	//ioctlsocket(shell.listenSocket, FIONBIO, &mode);
+	setSocketNonBlock(&shell.listenSocket);
 	return (SUCCESS);
 }
 
@@ -51,18 +46,14 @@ static BYTE bindSocket(void) {
 			(int)shell.addrResult->ai_addrlen
 			) == SOCKET_ERROR
 		) {
-			//journalReport(L"Failed to bind socket\n");
 			return (FAILURE);
 		}
 	return (SUCCESS);
 }
 
 static BYTE listenSocket(void) {
-	if (listen(shell.listenSocket, 1)) {
-		//journalReport(L"Failed to listen\n");
+	if (listen(shell.listenSocket, 1))
 		return (FAILURE);
-	}
-	//journalReport(L"Listenning to socket\n");
 	return (SUCCESS);
 }
 
@@ -74,8 +65,6 @@ BYTE initNetworking(void) {
 	if (bindSocket() == FAILURE) return (FAILURE);
 
 	if (listenSocket() == FAILURE) return (FAILURE);
-
-	//if (acceptClient() == FAILURE) return (FAILURE); // Why not in a thread instead of stopping everything ?
 
 	return (SUCCESS);
 }
