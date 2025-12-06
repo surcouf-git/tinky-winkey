@@ -81,7 +81,6 @@ static currentState_e updateProcess(void) {
 }
 
 currentState_e newSession(void) {
-	closesocket(shell.clientSocket);
 
 	if (updatePipes() == FATAL_ERROR)
 		return (FATAL_ERROR);

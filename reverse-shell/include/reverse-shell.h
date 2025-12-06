@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ws2tcpip.h>
-#include <windows.h>
 #include <iostream>
+#include <windows.h>
 
 #define HOSTNAME "localhost"
 #define PORT "6699"

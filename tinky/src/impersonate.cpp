@@ -3,6 +3,8 @@
 #include <tlhelp32.h>
 #include "processes.h"
 
+// Whole code here need a refactor
+
 using namespace std;
 
 extern tinky_t tinky;
@@ -39,14 +41,39 @@ static DWORD findProcessId(const wchar_t *process_name)
 	return (result);
 }
 
-void impersonate(void) {
+BYTE impersonate(void) {
 	DWORD pid = findProcessId(L"winlogon.exe");
-	HANDLE winlogonHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	HANDLE winlogonHandle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 
-	if (winlogonHandle == INVALID_HANDLE_VALUE)
+	if (winlogonHandle == INVALID_HANDLE_VALUE) {
 		journalReport(L"Failed to open process... Error code: " + itostring(GetLastError()) + L"\n");
-	if (!OpenProcessToken(winlogonHandle, TOKEN_ALL_ACCESS, &processes.systemToken))
+		return (FAILURE);
+	}
+
+	HANDLE tempToken = NULL;
+
+	if (!OpenProcessToken(winlogonHandle, TOKEN_DUPLICATE | TOKEN_QUERY, &tempToken)) {
 		journalReport(L"Failed to open process token... Error code: " + itostring(GetLastError()) + L"\n");
-	journalReport(L"Token impersonate success\n");
+		CloseHandle(winlogonHandle);
+		return (FAILURE);
+	}
+
+	if (!DuplicateTokenEx(
+		tempToken,
+		TOKEN_ALL_ACCESS,
+		NULL,
+		SecurityImpersonation,
+		TokenPrimary,
+		&processes.systemToken
+	)) {
+		journalReport(L"Failed to duplicate token... Error code: " + itostring(GetLastError()) + L"\n");
+		CloseHandle(tempToken);
+		CloseHandle(winlogonHandle);
+		return (FAILURE);
+	}
+
+	CloseHandle(tempToken);
 	CloseHandle(winlogonHandle);
+	journalReport(L"Token impersonate success\n");
+	return (SUCCESS);
 }

@@ -18,15 +18,27 @@ static DWORD argNumber(wchar_t **args) {
 	return (i);
 }
 
+static void controlArgs(wchar_t **args) {
+	static wchar_t *VALID_ARGS[] = { L"-reverse-shell", NULL };
+
+	for (DWORD i = 0; i < argNumber(args); i++) {
+		for (DWORD o = 0; o < argNumber(VALID_ARGS); o++) {
+			if (std::wcscmp(args[i], VALID_ARGS[o])) {
+				wcerr	<< L"Invalid argument: " << args[i] << L" -> ignored\n";
+			}
+		}
+	}
+}
+
 int start(void **args) {
 	wchar_t **realArgs = cleanArgumentLine((wchar_t **)args);
 
 	cout	<< "Starting service...\n";
 
-	if (realArgs == NULL) cout << "Real args null\n";
-
 	if (!initControl())
 		return (FAILURE);
+
+	controlArgs(realArgs);
 
 	if (!StartServiceW(tinky.serviceHandler, argNumber(realArgs), (LPCWSTR*)realArgs)) {
 		cerr	<< "Failed to start service...";
@@ -38,7 +50,6 @@ int start(void **args) {
 	}
 
 	cout	<< "Service started...\n";
-	journalReport(L"Service started successfully\n");
 
 	return (SUCCESS);
 }

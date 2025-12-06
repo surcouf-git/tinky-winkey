@@ -14,14 +14,14 @@ extern tinky_t tinky;
 int uninstall(void**) {
 	cout	<< "Deleting service from service control manager...\n";
 
-	if (!initControl())
-		return (FAILURE);
+	tinky.onDelete = TRUE;
+	stop(NULL);
 
 	if (!DeleteService(tinky.serviceHandler)) {
 		DWORD err = GetLastError();
 		cerr	<< "Failed to delete service... ";
 		if (err == ERROR_SERVICE_DOES_NOT_EXIST)
-			cerr	<< "(service does not exist)" << "\n"; // Jamais atteint si initControl() fail... (ERROR_SERVICE_NOT_ACTIVE)
+			cerr	<< "(service does not exist)" << "\n";
 		else 
 			cerr	<< "Error code: " << err << "\n";
 		return (FAILURE);

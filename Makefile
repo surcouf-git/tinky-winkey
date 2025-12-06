@@ -6,7 +6,7 @@ RSHELL_NAME = safe-shell.exe
 TINKY_INCL = /I tinky\include
 RSHELL_INCL = /I reverse-shell\include
 COMPILER = cl.exe
-CFLAGS = /nologo /Wall /WX /EHsc /wd4668 /wd4865 /wd5039 /wd5045 /wd4820
+CFLAGS = /nologo /Wall /WX /EHsc /wd4668 /wd4865 /wd4820 /wd5045 /wd5039
 OBJDIR = obj
 LIBS = Advapi32.lib psapi.lib user32.lib Ws2_32.lib Kernel32.lib
 
@@ -15,15 +15,17 @@ WINKEY_SRC = winkey\winkey.cpp
 RSHELL_SRC = reverse-shell\src\*.cpp
 
 TINKY_OBJ = $(OBJDIR)\main.obj \
-            $(OBJDIR)\utils.obj \
-            $(OBJDIR)\cmdLineManaged.obj \
-            $(OBJDIR)\delete.obj \
-            $(OBJDIR)\impersonate.obj \
-            $(OBJDIR)\install.obj \
-            $(OBJDIR)\serviceControlManaged.obj \
-            $(OBJDIR)\start.obj \
-            $(OBJDIR)\stop.obj \
+			$(OBJDIR)\utils.obj \
+			$(OBJDIR)\cmdLineManaged.obj \
+			$(OBJDIR)\delete.obj \
+			$(OBJDIR)\impersonate.obj \
+			$(OBJDIR)\install.obj \
+			$(OBJDIR)\serviceControlManaged.obj \
+			$(OBJDIR)\start.obj \
+			$(OBJDIR)\stop.obj \
 			$(OBJDIR)\processes.obj \
+			$(OBJDIR)\sCleanUp.obj 
+
 
 WINKEY_OBJ = $(OBJDIR)\winkey.obj
 

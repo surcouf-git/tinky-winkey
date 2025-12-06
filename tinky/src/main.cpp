@@ -35,7 +35,7 @@ int wmain(int argc, wchar_t **argv) {
 		
 		bool isJobDone = false;
 
-		for (int i = 0; i < NFUNC; i++) {
+		for (int i = 0; i < FUNCTION_COUNT; i++) {
 			if (!wcscmp(argv[1], args[i])) {
 				funcPtr[i]((void **)argv);
 				isJobDone = true;
