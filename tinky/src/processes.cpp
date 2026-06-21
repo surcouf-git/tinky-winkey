@@ -37,7 +37,7 @@ static BYTE launchGenericProcess(const wchar_t *genericProcessName) {
 	
 	alreadyDone = TRUE;
 	
-	process_t	newProcess = { genericProcessName }; // Expend to all generic process ?
+	process_t	newProcess = { genericProcessName };
 
 	if (!CreateProcessAsUserW(
 		processes.systemToken,

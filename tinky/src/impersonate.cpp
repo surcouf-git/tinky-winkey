@@ -3,8 +3,6 @@
 #include <tlhelp32.h>
 #include "processes.h"
 
-// Whole code here need a refactor
-
 using namespace std;
 
 extern tinky_t tinky;

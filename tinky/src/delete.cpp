@@ -6,10 +6,6 @@ using namespace std;
 
 extern tinky_t tinky;
 
-//static void deleteAdditionalFiles(void) {
-
-//}
-
 // delete() was taken..lol
 int uninstall(void**) {
 	cout	<< "Deleting service from service control manager...\n";

